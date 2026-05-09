@@ -1,18 +1,20 @@
-import { useEffect, useState } from "react";
-import agent from "./lib/api/agent";
+import { Outlet, useLocation } from "react-router";
+import CheckIn from "./features/checkIn/CheckIn";
+import NavBar from "./app/layout/NavBar";
 
 export default function App() {
-   const [checkIns, setCheckIns] = useState<CheckIn[]>([]);
-
-   useEffect(() => {
-      agent.CheckIns.list().then(setCheckIns);
-   }, []);
+   const location = useLocation();
 
    return (
-      <ul>
-         {checkIns.map((checkIn) => (
-            <li key={checkIn.id}>{checkIn.id}</li>
-         ))}
-      </ul>
+      <>
+         {location.pathname === "/" ? (
+            <CheckIn />
+         ) : (
+            <>
+               <NavBar />
+               <Outlet />
+            </>
+         )}
+      </>
    );
 }
