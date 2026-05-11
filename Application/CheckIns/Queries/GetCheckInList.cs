@@ -1,4 +1,8 @@
 using System;
+using Application.CheckIns.DTOs;
+using Application.Core;
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -8,13 +12,17 @@ namespace Application.CheckIns.Queries;
 
 public class GetCheckInList
 {
-    public class Query : IRequest<List<CheckIn>> { }
+    public class Query : IRequest<Result<List<CheckInDto>>> { }
 
-    public class Handler(AppDbContext context) : IRequestHandler<Query, List<CheckIn>>
+    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Query, Result<List<CheckInDto>>>
     {
-        public Task<List<CheckIn>> Handle(Query request, CancellationToken cancellationToken)
+        public async Task<Result<List<CheckInDto>>> Handle(Query request, CancellationToken cancellationToken)
         {
-            return context.CheckIns.ToListAsync(cancellationToken: cancellationToken);
+            var checkIns = await context.CheckIns
+                .ProjectTo<CheckInDto>(mapper.ConfigurationProvider)
+                .ToListAsync(cancellationToken);
+
+            return Result<List<CheckInDto>>.Success(checkIns);
         }
     }
 

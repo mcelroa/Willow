@@ -1,3 +1,5 @@
+using Application.CheckIns.Commands;
+using Application.CheckIns.DTOs;
 using Application.CheckIns.Queries;
 using Domain;
 using MediatR;
@@ -10,25 +12,21 @@ namespace API.Controllers;
 public class CheckInsController(AppDbContext context) : BaseApiController
 {
     [HttpGet]
-    public async Task<ActionResult<List<CheckIn>>> GetCheckIns()
+    public async Task<ActionResult<List<CheckInDto>>> GetCheckIns()
     {
-        return await Mediator.Send(new GetCheckInList.Query());
+        return HandleResult(await Mediator.Send(new GetCheckInList.Query { }));
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CheckIn>> GetCheckIn(string id)
+    public async Task<ActionResult<CheckInDto>> GetCheckIn(string id)
     {
-        var checkIn = await context.CheckIns.FindAsync(id);
-        if (checkIn == null) return NotFound();
-        return checkIn;
+        return HandleResult(await Mediator.Send(new GetCheckIn.Query { Id = id }));
     }
 
     [HttpPost]
-    public async Task<ActionResult<CheckIn>> CreateCheckIn(CheckIn checkIn)
+    public async Task<ActionResult<string>> CreateCheckIn(CreateCheckInDto dto)
     {
-        context.CheckIns.Add(checkIn);
-        await context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetCheckIn), new { id = checkIn.Id }, checkIn);
+        return HandleResult(await Mediator.Send(new CreateCheckIn.Command { CheckInDto = dto }));
     }
 
     [HttpPut("{id}")]

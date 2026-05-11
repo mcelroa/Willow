@@ -1,7 +1,10 @@
 using Application.CheckIns.Queries;
-using Domain;
+using Application.CheckIns.Validators;
+using Application.Core;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
+
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +14,13 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 );
 builder.Services.AddCors();
 builder.Services.AddMediatR(x =>
-    x.RegisterServicesFromAssemblyContaining<GetCheckInList.Handler>()
+{
+    x.RegisterServicesFromAssemblyContaining<GetCheckInList.Handler>();
+    x.AddOpenBehavior(typeof(ValidationBehaviour<,>));
+}
 );
+builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCheckInValidator>();
 
 
 var app = builder.Build();

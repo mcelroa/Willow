@@ -9,6 +9,12 @@ public class DbInitializer
     {
         if (context.CheckIns.Any()) return;
 
+        var rng = new Random();
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        DateOnly RandomPastDate() =>
+            today.AddDays(-rng.Next(1, 365));
+
         var checkIns = new List<CheckIn>
         {
             new()
@@ -17,6 +23,7 @@ public class DbInitializer
                 Pain = 1,
                 Fatigue = 1,
                 Nausea = 1,
+                Date = RandomPastDate()
             },
             new()
             {
@@ -24,6 +31,7 @@ public class DbInitializer
                 Pain = 3,
                 Fatigue = 2,
                 Nausea = 6,
+                Date = RandomPastDate()
             },
             new()
             {
@@ -31,6 +39,7 @@ public class DbInitializer
                 Pain = 1,
                 Fatigue = 2,
                 Nausea = 5,
+                Date = RandomPastDate()
             },
             new()
             {
@@ -38,6 +47,7 @@ public class DbInitializer
                 Pain = 2,
                 Fatigue = 2,
                 Nausea = 1,
+                Date = RandomPastDate()
             },
         };
 
