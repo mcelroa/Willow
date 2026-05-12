@@ -1,4 +1,3 @@
-using System;
 using Application.Core;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -17,10 +16,27 @@ public class BaseApiController : ControllerBase
 
     protected ActionResult HandleResult<T>(Result<T> result)
     {
-        if (!result.IsSuccess && result.Code == 404) return NotFound();
+        if (!result.IsSuccess) return result.Code switch
+        {
+            404 => NotFound(result.Error),
+            403 => Forbid(),
+            _ => BadRequest(result.Error)
+        };
 
-        if (result.IsSuccess && result.Value != null) return Ok(result.Value);
+        if (result.Value != null) return Ok(result.Value);
 
-        return BadRequest(result.Error);
+        return BadRequest("Result returned no value");
+    }
+
+    protected ActionResult HandleResult(Result<Unit> result)
+    {
+        if (!result.IsSuccess) return result.Code switch
+        {
+            404 => NotFound(result.Error),
+            403 => Forbid(),
+            _ => BadRequest(result.Error)
+        };
+
+        return NoContent();
     }
 }

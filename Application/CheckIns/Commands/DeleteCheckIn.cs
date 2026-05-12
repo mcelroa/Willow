@@ -1,20 +1,18 @@
-using Application.CheckIns.DTOs;
+using System;
 using Application.Core;
-using AutoMapper;
 using MediatR;
 using Persistence;
 
 namespace Application.CheckIns.Commands;
 
-public class EditCheckIn
+public class DeleteCheckIn
 {
     public class Command : IRequest<Result<Unit>>
     {
         public required string Id { get; set; }
-        public required SaveCheckInDto CheckInDto { get; set; }
     }
 
-    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, Result<Unit>>
+    public class Handler(AppDbContext context) : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
@@ -22,11 +20,11 @@ public class EditCheckIn
 
             if (checkIn == null) return Result<Unit>.Failure("Check in not found", 404);
 
-            mapper.Map(request.CheckInDto, checkIn);
+            context.CheckIns.Remove(checkIn);
 
             var result = await context.SaveChangesAsync(cancellationToken) > 0;
 
-            if (!result) return Result<Unit>.Failure("Failed to update check in", 400);
+            if (!result) return Result<Unit>.Failure("Failed to delete check in", 400);
 
             return Result<Unit>.Success(Unit.Value);
         }

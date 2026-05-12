@@ -1,9 +1,9 @@
-using System;
 using Application.CheckIns.DTOs;
 using Application.Core;
 using AutoMapper;
-using Domain;
+using AutoMapper.QueryableExtensions;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.CheckIns.Queries;
@@ -19,11 +19,14 @@ public class GetCheckIn
     {
         public async Task<Result<CheckInDto>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var checkIn = await context.CheckIns.FindAsync([request.Id], cancellationToken);
+            var checkIn = await context.CheckIns
+                .Where(x => x.Id == request.Id)
+                .ProjectTo<CheckInDto>(mapper.ConfigurationProvider)
+                .FirstOrDefaultAsync(cancellationToken);
 
-            if (checkIn == null) return Result<CheckInDto>.Failure("No check in exists", 404);
+            if (checkIn == null) return Result<CheckInDto>.Failure("Check in not found", 404);
 
-            return Result<CheckInDto>.Success(mapper.Map<CheckInDto>(checkIn));
+            return Result<CheckInDto>.Success(checkIn);
         }
     }
 }

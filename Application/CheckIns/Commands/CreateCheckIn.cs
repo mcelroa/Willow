@@ -1,4 +1,3 @@
-using System;
 using Application.CheckIns.DTOs;
 using Application.Core;
 using AutoMapper;
@@ -12,7 +11,7 @@ public class CreateCheckIn
 {
     public class Command : IRequest<Result<string>>
     {
-        public required CreateCheckInDto CheckInDto { get; set; }
+        public required SaveCheckInDto CheckInDto { get; set; }
     }
 
     public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, Result<string>>

@@ -4,7 +4,7 @@ using FluentValidation;
 
 namespace Application.CheckIns.Validators;
 
-public class BaseCheckInValidator : AbstractValidator<BaseCheckInDto>
+public class BaseCheckInValidator : AbstractValidator<SaveCheckInDto>
 {
     public BaseCheckInValidator()
     {

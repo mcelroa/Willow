@@ -1,15 +1,11 @@
 using Application.CheckIns.Commands;
 using Application.CheckIns.DTOs;
 using Application.CheckIns.Queries;
-using Domain;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Persistence;
 
 namespace API.Controllers;
 
-public class CheckInsController(AppDbContext context) : BaseApiController
+public class CheckInsController : BaseApiController
 {
     [HttpGet]
     public async Task<ActionResult<List<CheckInDto>>> GetCheckIns()
@@ -24,27 +20,20 @@ public class CheckInsController(AppDbContext context) : BaseApiController
     }
 
     [HttpPost]
-    public async Task<ActionResult<string>> CreateCheckIn(CreateCheckInDto dto)
+    public async Task<ActionResult<string>> CreateCheckIn(SaveCheckInDto dto)
     {
         return HandleResult(await Mediator.Send(new CreateCheckIn.Command { CheckInDto = dto }));
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateCheckIn(string id, CheckIn checkIn)
+    public async Task<IActionResult> EditCheckIn(string id, SaveCheckInDto dto)
     {
-        if (id != checkIn.Id) return BadRequest();
-        context.Entry(checkIn).State = EntityState.Modified;
-        await context.SaveChangesAsync();
-        return NoContent();
+        return HandleResult(await Mediator.Send(new EditCheckIn.Command { Id = id, CheckInDto = dto }));
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteCheckIn(string id)
     {
-        var checkIn = await context.CheckIns.FindAsync(id);
-        if (checkIn == null) return NotFound();
-        context.CheckIns.Remove(checkIn);
-        await context.SaveChangesAsync();
-        return NoContent();
+        return HandleResult(await Mediator.Send(new DeleteCheckIn.Command { Id = id }));
     }
 }

@@ -1,4 +1,3 @@
-using System;
 using Application.CheckIns.Commands;
 using FluentValidation;
 
@@ -8,7 +7,7 @@ public class EditCheckInValidator : AbstractValidator<EditCheckIn.Command>
 {
     public EditCheckInValidator()
     {
+        RuleFor(x => x.Id).NotEmpty();
         RuleFor(x => x.CheckInDto).SetValidator(new BaseCheckInValidator());
-        RuleFor(x => x.CheckInDto.Id).NotEmpty();
     }
 }
