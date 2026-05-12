@@ -1,10 +1,12 @@
 using Application.CheckIns.Commands;
 using Application.CheckIns.DTOs;
 using Application.CheckIns.Queries;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
+[Authorize]
 public class CheckInsController : BaseApiController
 {
     [HttpGet]

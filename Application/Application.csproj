@@ -20,10 +20,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Account\" />
+    <Folder Include="Account\DTOs\" />
     <Folder Include="CheckIns\Commands\" />
     <Folder Include="CheckIns\Queries\" />
     <Folder Include="CheckIns\Validators\" />
     <Folder Include="Core\" />
+    <Folder Include="Core\Interfaces\" />
   </ItemGroup>
 
 </Project>

@@ -9,4 +9,7 @@ public class CheckIn
     public int Fatigue { get; set; }
     public int Nausea { get; set; }
     public required DateOnly Date { get; set; }
+
+    public string UserId { get; set; } = "";
+    public AppUser User { get; set; } = null!;
 }

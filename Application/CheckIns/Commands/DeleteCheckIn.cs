@@ -1,6 +1,8 @@
 using System;
 using Application.Core;
+using Application.Core.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.CheckIns.Commands;
@@ -12,11 +14,13 @@ public class DeleteCheckIn
         public required string Id { get; set; }
     }
 
-    public class Handler(AppDbContext context) : IRequestHandler<Command, Result<Unit>>
+    public class Handler(AppDbContext context, IUserAccessor userAccessor)
+        : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var checkIn = await context.CheckIns.FindAsync([request.Id], cancellationToken);
+            var checkIn = await context.CheckIns
+                .FirstOrDefaultAsync(x => x.Id == request.Id && x.UserId == userAccessor.GetUserId(), cancellationToken);
 
             if (checkIn == null) return Result<Unit>.Failure("Check in not found", 404);
 

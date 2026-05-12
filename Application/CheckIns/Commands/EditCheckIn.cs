@@ -1,7 +1,9 @@
 using Application.CheckIns.DTOs;
 using Application.Core;
+using Application.Core.Interfaces;
 using AutoMapper;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.CheckIns.Commands;
@@ -14,11 +16,13 @@ public class EditCheckIn
         public required SaveCheckInDto CheckInDto { get; set; }
     }
 
-    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Command, Result<Unit>>
+    public class Handler(AppDbContext context, IMapper mapper, IUserAccessor userAccessor)
+        : IRequestHandler<Command, Result<Unit>>
     {
         public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken)
         {
-            var checkIn = await context.CheckIns.FindAsync([request.Id], cancellationToken);
+            var checkIn = await context.CheckIns
+                .FirstOrDefaultAsync(x => x.Id == request.Id && x.UserId == userAccessor.GetUserId(), cancellationToken);
 
             if (checkIn == null) return Result<Unit>.Failure("Check in not found", 404);
 

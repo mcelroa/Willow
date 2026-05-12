@@ -7,6 +7,11 @@ using Persistence;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Domain;
+using API.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Application.Core.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,7 +32,25 @@ builder.Services.AddIdentityCore<AppUser>(opt =>
 {
     opt.Password.RequireNonAlphanumeric = false;
 })
-.AddEntityFrameworkStores<AppDbContext>();
+    .AddEntityFrameworkStores<AppDbContext>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(opt =>
+    {
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!));
+
+        opt.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = key,
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddScoped<TokenService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUserAccessor, UserAccessor>();
 
 
 var app = builder.Build();
@@ -53,6 +76,8 @@ app.UseCors(x =>
     .AllowCredentials()
     .WithOrigins("http://localhost:3000", "https://localhost:3000")
 );
+app.UseAuthentication();
+app.UseAuthorization();
 app.MapControllers();
 
 using var scope = app.Services.CreateScope();

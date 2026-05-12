@@ -483,3 +483,5 @@ $RECYCLE.BIN/
 API/willow.db
 API/willow.db-shm
 API/willow.db-wal
+API/appsettings.Development.json
+API/appsettings.json

@@ -1,5 +1,6 @@
 using Application.CheckIns.DTOs;
 using Application.Core;
+using Application.Core.Interfaces;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using MediatR;
@@ -15,12 +16,13 @@ public class GetCheckIn
         public required string Id { get; set; }
     }
 
-    public class Handler(AppDbContext context, IMapper mapper) : IRequestHandler<Query, Result<CheckInDto>>
+    public class Handler(AppDbContext context, IMapper mapper, IUserAccessor userAccessor)
+        : IRequestHandler<Query, Result<CheckInDto>>
     {
         public async Task<Result<CheckInDto>> Handle(Query request, CancellationToken cancellationToken)
         {
             var checkIn = await context.CheckIns
-                .Where(x => x.Id == request.Id)
+                .Where(x => x.Id == request.Id && x.UserId == userAccessor.GetUserId())
                 .ProjectTo<CheckInDto>(mapper.ConfigurationProvider)
                 .FirstOrDefaultAsync(cancellationToken);
 
