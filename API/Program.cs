@@ -6,6 +6,7 @@ using Persistence;
 
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
+using Domain;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,11 @@ builder.Services.AddMediatR(x =>
 );
 builder.Services.AddAutoMapper(typeof(MappingProfiles).Assembly);
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCheckInValidator>();
+builder.Services.AddIdentityCore<AppUser>(opt =>
+{
+    opt.Password.RequireNonAlphanumeric = false;
+})
+.AddEntityFrameworkStores<AppDbContext>();
 
 
 var app = builder.Build();
