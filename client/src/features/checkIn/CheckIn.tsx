@@ -1,4 +1,3 @@
-import NavBar from "@/app/layout/NavBar";
 import { Button } from "@/components/ui/button";
 import {
    Card,
@@ -13,7 +12,6 @@ import { Input } from "@/components/ui/input";
 export default function CheckIn() {
    return (
       <>
-         <NavBar />
          <Card className="mx-auto m-4 p-4">
             <CardHeader>
                <CardTitle>Daily Check In</CardTitle>

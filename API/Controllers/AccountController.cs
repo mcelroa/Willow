@@ -1,4 +1,4 @@
-using System;
+using System.Security.Claims;
 using API.Services;
 using Application.Account.DTOs;
 using Domain;
@@ -8,10 +8,25 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
 
-[AllowAnonymous]
 public class AccountController(UserManager<AppUser> userManager, TokenService tokenService)
     : BaseApiController
 {
+    [Authorize]
+    [HttpGet]
+    public async Task<ActionResult<UserDto>> GetCurrentUser()
+    {
+        var user = await userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)!);
+        if (user == null) return Unauthorized();
+
+        return new UserDto
+        {
+            Username = user.UserName!,
+            Email = user.Email!,
+            Token = tokenService.CreateToken(user)
+        };
+    }
+
+    [AllowAnonymous]
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
@@ -29,6 +44,7 @@ public class AccountController(UserManager<AppUser> userManager, TokenService to
         };
     }
 
+    [AllowAnonymous]
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
