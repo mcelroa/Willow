@@ -6,66 +6,127 @@ import {
    CardHeader,
    CardTitle,
 } from "@/components/ui/card";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useCheckIn } from "@/lib/hooks/useCheckIn";
+import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, useWatch } from "react-hook-form";
+
+const today = new Date().toISOString().split("T")[0];
+
+const symptomFields = [
+   { name: "mood", label: "Mood" },
+   { name: "pain", label: "Pain" },
+   { name: "fatigue", label: "Fatigue" },
+   { name: "nausea", label: "Nausea" },
+] as const;
 
 export default function CheckIn() {
+   const { createCheckIn } = useCheckIn();
+
+   const {
+      register,
+      handleSubmit,
+      control,
+      reset,
+      formState: { errors, isSubmitting },
+   } = useForm<CheckInSchema>({
+      resolver: zodResolver(checkInSchema),
+      defaultValues: {
+         date: today,
+         mood: 5,
+         pain: 5,
+         fatigue: 5,
+         nausea: 5,
+      },
+   });
+
+   const watchedValues = useWatch({
+      control,
+      name: ["mood", "pain", "fatigue", "nausea"],
+   });
+   const sliderValues = {
+      mood: watchedValues[0],
+      pain: watchedValues[1],
+      fatigue: watchedValues[2],
+      nausea: watchedValues[3],
+   };
+
+   const onSubmit = (data: CheckInSchema) => {
+      createCheckIn.mutate(data, {
+         onSuccess: () =>
+            reset({ date: today, mood: 5, pain: 5, fatigue: 5, nausea: 5 }),
+      });
+   };
+
    return (
-      <>
-         <Card className="mx-auto m-4 p-4">
-            <CardHeader>
-               <CardTitle>Daily Check In</CardTitle>
-               <CardDescription>Log how you are feeling today</CardDescription>
-            </CardHeader>
-            <CardContent>
-               {/* Holds Date & Symptoms */}
-               <div className="grid grid-cols-2 gap-4 mb-4">
-                  <Card className="p-4">
-                     <Field>
-                        <FieldLabel htmlFor="inputDate">Date</FieldLabel>
-                        <Input id="inputDate" type="date" />
+      <Card className="max-w-xl">
+         <CardHeader>
+            <CardTitle>Daily Check In</CardTitle>
+            <CardDescription>Log how you are feeling today</CardDescription>
+         </CardHeader>
+         <CardContent>
+            <form
+               onSubmit={handleSubmit(onSubmit)}
+               className="flex flex-col gap-6"
+            >
+               <Field>
+                  <FieldLabel htmlFor="date">Date</FieldLabel>
+                  <Input id="date" type="date" {...register("date")} />
+                  {errors.date && (
+                     <p className="text-sm text-red-500">
+                        {errors.date.message}
+                     </p>
+                  )}
+               </Field>
+
+               <div className="grid grid-cols-2 gap-4">
+                  {symptomFields.map(({ name, label }) => (
+                     <Field key={name}>
+                        <div className="flex justify-between">
+                           <FieldLabel htmlFor={name}>{label}</FieldLabel>
+                           <span className="text-sm font-medium">
+                              {sliderValues[name]}
+                           </span>
+                        </div>
+                        <Input
+                           id={name}
+                           type="range"
+                           min={1}
+                           max={10}
+                           step={1}
+                           {...register(name, { valueAsNumber: true })}
+                        />
                      </Field>
-                  </Card>
-                  <Card className="p-4">
-                     <FieldGroup>
-                        <Field>
-                           <FieldLabel htmlFor="inputMood">Mood</FieldLabel>
-                           <Input id="inputMood" type="range" />
-                        </Field>
-                        <Field>
-                           <FieldLabel htmlFor="inputPain">Pain</FieldLabel>
-                           <Input id="inputPain" type="range" />
-                        </Field>
-                        <Field>
-                           <FieldLabel htmlFor="inputFatigue">
-                              Fatigue
-                           </FieldLabel>
-                           <Input id="inputFatigue" type="range" />
-                        </Field>
-                        <Field>
-                           <FieldLabel htmlFor="inputNausea">Nausea</FieldLabel>
-                           <Input id="inputNausea" type="range" />
-                        </Field>
-                     </FieldGroup>
-                  </Card>
+                  ))}
                </div>
-               {/* Holds notes */}
-               <div className="mb-4">
-                  <Field>
-                     <FieldLabel htmlFor="inputNotes">Notes</FieldLabel>
-                     <Input
-                        id="inputNotes"
-                        type="textarea"
-                        placeholder="Anything notable today?"
-                     />
-                  </Field>
+
+               <Field>
+                  <FieldLabel htmlFor="notes">Notes</FieldLabel>
+                  <Textarea
+                     id="notes"
+                     placeholder="Anything notable today?"
+                     {...register("notes")}
+                  />
+               </Field>
+
+               <div className="flex justify-end items-center gap-3">
+                  {createCheckIn.isSuccess && (
+                     <p className="text-sm text-green-600">Check in saved!</p>
+                  )}
+                  {createCheckIn.isError && (
+                     <p className="text-sm text-red-500">
+                        Something went wrong.
+                     </p>
+                  )}
+                  <Button type="submit" disabled={isSubmitting}>
+                     {isSubmitting ? "Saving..." : "Save Entry"}
+                  </Button>
                </div>
-               {/* Holds Button */}
-               <div className="flex justify-end">
-                  <Button>Save Entry</Button>
-               </div>
-            </CardContent>
-         </Card>
-      </>
+            </form>
+         </CardContent>
+      </Card>
    );
 }
