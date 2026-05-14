@@ -1,10 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import agent from "../api/agent";
-import { useNavigate } from "react-router";
+import agent from "@/lib/api/agent";
 
 export const useCheckIn = (id?: string) => {
    const queryClient = useQueryClient();
-   const navigate = useNavigate();
 
    const { data: checkIns = [], isLoading: loadingCheckIns } = useQuery({
       queryKey: ["checkIns"],
@@ -28,7 +26,6 @@ export const useCheckIn = (id?: string) => {
       mutationFn: (data: SaveCheckInDto) => agent.CheckIns.update(id!, data),
       onSuccess: () => {
          queryClient.invalidateQueries({ queryKey: ["checkIns"] });
-         navigate("/history");
       },
    });
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
-import agent from "../api/agent";
+import agent from "@/lib/api/agent";
 
 export const useAccount = () => {
    const queryClient = useQueryClient();

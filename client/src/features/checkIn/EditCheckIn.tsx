@@ -13,7 +13,7 @@ import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 
 const symptomFields = [
    { name: "mood", label: "Mood" },
@@ -25,6 +25,7 @@ const symptomFields = [
 export default function EditCheckIn() {
    const { id } = useParams<{ id: string }>();
    const { checkIn, loadingCheckIn, updateCheckIn } = useCheckIn(id);
+   const navigate = useNavigate();
 
    const {
       register,
@@ -58,7 +59,11 @@ export default function EditCheckIn() {
    };
 
    const onSubmit = (data: CheckInSchema) => {
-      updateCheckIn.mutate(data);
+      updateCheckIn.mutate(data, {
+         onSuccess: () => {
+            navigate("/history");
+         },
+      });
    };
 
    if (loadingCheckIn)

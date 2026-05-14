@@ -50,7 +50,10 @@ export default function History() {
                         <Button
                            variant="ghost"
                            size="sm"
-                           onClick={() => deleteCheckIn.mutate(checkIn.id)}
+                           onClick={() => {
+                              if (window.confirm("Delete this check-in?"))
+                                 deleteCheckIn.mutate(checkIn.id);
+                           }}
                            disabled={deleteCheckIn.isPending}
                         >
                            Delete

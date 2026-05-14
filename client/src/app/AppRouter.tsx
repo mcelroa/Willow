@@ -6,6 +6,7 @@ import Layout from "./layout/Layout";
 import CheckIn from "@/features/checkIn/CheckIn";
 import History from "@/features/checkIn/History";
 import EditCheckIn from "@/features/checkIn/EditCheckIn";
+import Trends from "@/features/checkIn/Trends";
 
 export default function AppRouter() {
    return (
@@ -19,6 +20,7 @@ export default function AppRouter() {
                <Route path="/checkin" element={<CheckIn />} />
                <Route path="/history" element={<History />} />
                <Route path="/history/:id" element={<EditCheckIn />} />
+               <Route path="/trends" element={<Trends />} />
             </Route>
          </Route>
       </Routes>

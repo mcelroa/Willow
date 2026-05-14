@@ -14,8 +14,6 @@ import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 
-const today = new Date().toISOString().split("T")[0];
-
 const symptomFields = [
    { name: "mood", label: "Mood" },
    { name: "pain", label: "Pain" },
@@ -24,6 +22,8 @@ const symptomFields = [
 ] as const;
 
 export default function CheckIn() {
+   const today = new Date().toISOString().split("T")[0];
+
    const { createCheckIn } = useCheckIn();
 
    const {
@@ -62,7 +62,7 @@ export default function CheckIn() {
    };
 
    return (
-      <Card className="max-w-xl">
+      <Card className="max-w-xl mx-auto m-6">
          <CardHeader>
             <CardTitle>Daily Check In</CardTitle>
             <CardDescription>Log how you are feeling today</CardDescription>
