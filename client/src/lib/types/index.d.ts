@@ -1,6 +1,6 @@
 type CheckIn = {
    id: string;
-   notes: string;
+   notes?: string;
    mood: number;
    pain: number;
    fatigue: number;

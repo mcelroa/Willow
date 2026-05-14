@@ -4,6 +4,8 @@ import { Navigate, Route, Routes } from "react-router";
 import RequireAuth from "./layout/RequireAuth";
 import Layout from "./layout/Layout";
 import CheckIn from "@/features/checkIn/CheckIn";
+import History from "@/features/checkIn/History";
+import EditCheckIn from "@/features/checkIn/EditCheckIn";
 
 export default function AppRouter() {
    return (
@@ -15,6 +17,8 @@ export default function AppRouter() {
             <Route element={<Layout />}>
                <Route index element={<Navigate to="/checkin" replace />} />
                <Route path="/checkin" element={<CheckIn />} />
+               <Route path="/history" element={<History />} />
+               <Route path="/history/:id" element={<EditCheckIn />} />
             </Route>
          </Route>
       </Routes>

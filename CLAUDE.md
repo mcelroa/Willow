@@ -51,23 +51,46 @@ This is a health tracking app with a Clean Architecture .NET backend and a React
 - `BaseApiController` provides `Mediator` (lazy-loaded from `HttpContext.RequestServices`) and `HandleResult<T>()` / `HandleResult(Result<Unit>)` overloads that map `Result<T>` to HTTP responses
 - Controllers are thin — they dispatch to MediatR and return `HandleResult(...)`
 - `TokenService` in `API/Services/` generates JWTs signed with `Jwt:Key` from config using HMAC-SHA512 (key must be ≥ 64 characters)
-- `AccountController` is `[AllowAnonymous]`, all other controllers use `[Authorize]`
+- `AccountController` has `[AllowAnonymous]` per method on login/register; `GET /api/account` is `[Authorize]` and returns the current user from JWT claims
+- All other controllers use `[Authorize]`
 - Exception middleware in `Program.cs` catches `ValidationException` and returns structured `400`
 
 ### Authentication flow
 1. POST `/api/account/register` or `/api/account/login` → returns `UserDto` with JWT
-2. Client sends `Authorization: Bearer <token>` on subsequent requests
-3. JWT middleware validates signature, populates `HttpContext.User` with claims (Id, Email, UserName)
+2. Client stores JWT in `localStorage` under key `"jwt"`
+3. Axios interceptor in `agent.ts` attaches `Authorization: Bearer <token>` to every request
+4. JWT middleware validates signature, populates `HttpContext.User` with claims
+5. On app load, `useAccount` calls `GET /api/account` to rehydrate the current user if a token exists
 
 ### Frontend — React 19 + Vite
 
-Located in `client/`. Uses:
-- **React Router v7** — routing in `AppRouter.tsx`
-- **shadcn/ui** — component library, components in `src/components/ui/`
+Located in `client/`. Key libraries:
+- **React Router v7** — routing in `src/app/AppRouter.tsx`
+- **TanStack React Query** — all server state and data fetching
+- **React Hook Form + Zod** — form state and validation. Schemas live in `src/lib/schemas/`
+- **axios** — HTTP client. Single named instance in `src/lib/api/agent.ts` with Bearer token interceptor
+- **shadcn/ui** — component library in `src/components/ui/`
 - **Tailwind CSS v4**
-- **`@tabler/icons-react`** and **`lucide-react`** for icons
 
-Frontend is early-stage — currently has a stubbed `CheckIn` form component with no API integration yet.
+### Frontend folder structure
+
+```
+src/
+  app/
+    AppRouter.tsx          # all routes — public and protected
+    layout/
+      Layout.tsx           # NavBar + Outlet wrapper for protected pages
+      NavBar.tsx
+      RequireAuth.tsx      # redirects to /login if no current user
+  features/
+    account/               # Login.tsx, Register.tsx
+    checkIn/               # CheckIn.tsx
+  lib/
+    api/agent.ts           # axios instance, interceptor, all API methods grouped by resource
+    hooks/                 # one React Query hook file per feature (useAccount.ts, useCheckIn.ts)
+    schemas/               # Zod schemas (loginSchema.ts, registerSchema.ts, checkInSchema.ts)
+    types/index.d.ts       # global TypeScript types matching backend DTOs
+```
 
 ### Adding a new feature
 
@@ -76,7 +99,11 @@ Frontend is early-stage — currently has a stubbed `CheckIn` form component wit
 3. Add feature folder under `Application/<Feature>/` with `Commands/`, `Queries/`, `Validators/`, `DTOs/`
 4. Add mappings to `Application/Core/MappingProfiles.cs`
 5. Add controller in `API/Controllers/` extending `BaseApiController`
-6. Add frontend hook in `client/src/features/<feature>/`
+6. Add frontend types to `src/lib/types/index.d.ts`
+7. Add API methods to the relevant group in `src/lib/api/agent.ts`
+8. Add Zod schema in `src/lib/schemas/`
+9. Add React Query hook in `src/lib/hooks/`
+10. Add page component in `src/features/<feature>/` and wire up route in `AppRouter.tsx`
 
 ### Config
 - SQLite DB connection string lives in `appsettings.Development.json` (`Data Source=willow.db`)
