@@ -84,7 +84,8 @@ src/
       RequireAuth.tsx      # redirects to /login if no current user
   features/
     account/               # Login.tsx, Register.tsx
-    checkIn/               # CheckIn.tsx
+    checkIn/               # CheckIn.tsx, EditCheckIn.tsx, History.tsx
+    trends/                # Trends.tsx
   lib/
     api/agent.ts           # axios instance, interceptor, all API methods grouped by resource
     hooks/                 # one React Query hook file per feature (useAccount.ts, useCheckIn.ts)
@@ -108,3 +109,43 @@ src/
 ### Config
 - SQLite DB connection string lives in `appsettings.Development.json` (`Data Source=willow.db`)
 - JWT key lives in `appsettings.Development.json` under `Jwt:Key` — must be ≥ 64 characters for HMAC-SHA512
+
+## Next feature: Questions
+
+Users can record questions to ask their oncologist/nurse before appointments. Planned design:
+
+### Domain entity (`Domain/Question.cs`)
+```csharp
+public class Question
+{
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public string Text { get; set; } = "";
+    public bool IsAsked { get; set; } = false;
+    public DateOnly CreatedAt { get; set; }
+    public string UserId { get; set; } = "";
+    public AppUser User { get; set; } = null!;
+}
+```
+
+### Backend
+- `DbSet<Question>` in `AppDbContext`, migration needed
+- `Application/Questions/DTOs/` — `QuestionDto`, `CreateQuestionDto`
+- `Application/Questions/Queries/` — `GetQuestionList` (returns all questions for user)
+- `Application/Questions/Commands/` — `CreateQuestion`, `DeleteQuestion`, `MarkAsked` (flips IsAsked to true)
+- `Application/Questions/Validators/` — validator for `CreateQuestionDto` (Text required)
+- Mappings in `MappingProfiles.cs`
+- `API/Controllers/QuestionsController.cs`
+
+### Frontend
+- Types: `QuestionDto`, `CreateQuestionDto` in `index.d.ts`
+- Agent methods: `Questions.list()`, `Questions.create()`, `Questions.delete()`, `Questions.markAsked()`
+- Hook: `src/lib/hooks/useQuestion.ts`
+- Schema: `src/lib/schemas/questionSchema.ts` (just `text: z.string().min(1)`)
+- Page: `src/features/questions/Questions.tsx` — two tabs (Pending / Asked). Pending tab has an inline text input to add questions. Each pending card has "Mark as asked" and "Delete" buttons. Asked tab is read-only.
+- Route: `/questions` added to `AppRouter.tsx` inside protected Layout route
+
+### API endpoints
+- `GET /api/questions` — list all questions for current user
+- `POST /api/questions` — create question
+- `DELETE /api/questions/{id}` — delete question
+- `PATCH /api/questions/{id}/mark-asked` — mark as asked (no request body needed)

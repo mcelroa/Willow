@@ -27,6 +27,11 @@
     <Folder Include="CheckIns\Validators\" />
     <Folder Include="Core\" />
     <Folder Include="Core\Interfaces\" />
+    <Folder Include="Questions\" />
+    <Folder Include="Questions\Commands\" />
+    <Folder Include="Questions\DTOs\" />
+    <Folder Include="Questions\Queries\" />
+    <Folder Include="Questions\Validators\" />
   </ItemGroup>
 
 </Project>

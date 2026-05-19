@@ -1,4 +1,5 @@
 using Application.CheckIns.DTOs;
+using Application.Questions.DTOs;
 using AutoMapper;
 using Domain;
 
@@ -10,5 +11,7 @@ public class MappingProfiles : Profile
     {
         CreateMap<CheckIn, CheckInDto>();
         CreateMap<SaveCheckInDto, CheckIn>();
+        CreateMap<Question, QuestionDto>();
+        CreateMap<CreateQuestionDto, Question>();
     }
 }
