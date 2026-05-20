@@ -7,6 +7,7 @@ const navLinks = [
    { label: "Check In", path: "/checkin" },
    { label: "History", path: "/history" },
    { label: "Trends", path: "/trends" },
+   { label: "Questions", path: "/questions" },
    { label: "Export", path: "/export" },
 ];
 

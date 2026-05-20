@@ -22,6 +22,8 @@ const requests = {
    put: <T>(url: string, body: object) =>
       axiosInstance.put<T>(url, body).then(responseBody),
    delete: <T>(url: string) => axiosInstance.delete<T>(url).then(responseBody),
+   patch: <T>(url: string) =>
+      axiosInstance.patch<T>(url, {}).then(responseBody),
 };
 
 const agent = {
@@ -40,6 +42,20 @@ const agent = {
       update: (id: string, checkIn: SaveCheckInDto) =>
          requests.put<CheckIn>(`/checkins/${id}`, checkIn),
       delete: (id: string) => requests.delete<void>(`/checkins/${id}`),
+   },
+   Questions: {
+      list: () => requests.get<QuestionDto[]>("/questions"),
+      create: (dto: CreateQuestionDto) =>
+         requests.post<string>("/questions", dto),
+      delete: (id: string) => requests.delete<void>(`/questions/${id}`),
+      markAsked: (id: string) =>
+         requests.patch<void>(`/questions/${id}/mark-asked`),
+   },
+   Export: {
+      pdf: () =>
+         axiosInstance
+            .get("/export/pdf", { responseType: "blob" })
+            .then((res) => res.data as Blob),
    },
 };
 

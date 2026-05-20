@@ -33,3 +33,14 @@ type RegisterDto = {
    email: string;
    password: string;
 };
+
+type QuestionDto = {
+   id: string;
+   text: string;
+   isAsked: boolean;
+   createdAt: string;
+};
+
+type CreateQuestionDto = {
+   text: string;
+};
