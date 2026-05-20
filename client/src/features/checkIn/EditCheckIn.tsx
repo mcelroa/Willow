@@ -14,6 +14,7 @@ import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { useNavigate, useParams } from "react-router";
+import { toast } from "sonner";
 
 const symptomFields = [
    { name: "mood", label: "Mood" },
@@ -61,8 +62,10 @@ export default function EditCheckIn() {
    const onSubmit = (data: CheckInSchema) => {
       updateCheckIn.mutate(data, {
          onSuccess: () => {
+            toast.success("Check-in updated!");
             navigate("/history");
          },
+         onError: () => toast.error("Something went wrong."),
       });
    };
 
@@ -122,12 +125,7 @@ export default function EditCheckIn() {
                   />
                </Field>
 
-               <div className="flex justify-end items-center gap-3">
-                  {updateCheckIn.isError && (
-                     <p className="text-sm text-red-500">
-                        Something went wrong.
-                     </p>
-                  )}
+               <div className="flex justify-end">
                   <Button type="submit" disabled={isSubmitting}>
                      {isSubmitting ? "Saving..." : "Save Changes"}
                   </Button>

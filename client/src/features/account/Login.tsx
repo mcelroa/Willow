@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router";
 
 export default function Login() {
    const { loginUser } = useAccount();
@@ -58,6 +59,15 @@ export default function Login() {
                   </p>
                )}
             </form>
+            <p className="text-sm text-center text-muted-foreground mt-2">
+               Don't have an account?{" "}
+               <Link
+                  to="/register"
+                  className="text-foregorund underline underline-offset-4"
+               >
+                  Register
+               </Link>
+            </p>
          </div>
       </div>
    );

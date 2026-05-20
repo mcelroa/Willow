@@ -4,6 +4,7 @@ using Application.Core.Interfaces;
 using AutoMapper;
 using Domain;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Application.CheckIns.Commands;
@@ -20,8 +21,16 @@ public class CreateCheckIn
     {
         public async Task<Result<string>> Handle(Command request, CancellationToken cancellationToken)
         {
+            var userId = userAccessor.GetUserId();
+
+            var exists = await context.CheckIns.AnyAsync(
+                c => c.UserId == userId && c.Date == request.CheckInDto.Date
+            );
+
+            if (exists) return Result<string>.Failure("A check-in already exists for this date", 400);
+
             var checkIn = mapper.Map<CheckIn>(request.CheckInDto);
-            checkIn.UserId = userAccessor.GetUserId();
+            checkIn.UserId = userId;
 
             context.CheckIns.Add(checkIn);
 

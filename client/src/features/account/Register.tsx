@@ -8,6 +8,7 @@ import {
 } from "@/lib/schemas/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router";
 
 export default function Register() {
    const { registerUser } = useAccount();
@@ -70,6 +71,15 @@ export default function Register() {
                   </p>
                )}
             </form>
+            <p className="text-sm text-center text-muted-foreground mt-2">
+               Already have an account?{" "}
+               <Link
+                  to="/login"
+                  className="text-foreground underline underline-offset-4"
+               >
+                  Sign in
+               </Link>
+            </p>
          </div>
       </div>
    );

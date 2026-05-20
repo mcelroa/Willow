@@ -1,3 +1,14 @@
+import {
+   AlertDialog,
+   AlertDialogAction,
+   AlertDialogCancel,
+   AlertDialogContent,
+   AlertDialogDescription,
+   AlertDialogFooter,
+   AlertDialogHeader,
+   AlertDialogTitle,
+   AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,15 +20,11 @@ import {
 } from "@/lib/schemas/questionSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 export default function Questions() {
-   const {
-      questions,
-      isLoadingQuestions,
-      createQuestion,
-      deleteQuestion,
-      markAsked,
-   } = useQuestion();
+   const { questions, isLoading, createQuestion, deleteQuestion, markAsked } =
+      useQuestion();
 
    const {
       register,
@@ -29,10 +36,19 @@ export default function Questions() {
    });
 
    const onSubmit = (data: QuestionFormValues) => {
-      createQuestion.mutate({ text: data.text }, { onSuccess: () => reset() });
+      createQuestion.mutate(
+         { text: data.text },
+         {
+            onSuccess: () => {
+               reset();
+               toast.success("Question added.");
+            },
+            onError: () => toast.error("Something went wrong."),
+         },
+      );
    };
 
-   if (isLoadingQuestions)
+   if (isLoading)
       return (
          <p className="text-center mt-12 text-muted-foreground">Loading...</p>
       );
@@ -59,9 +75,9 @@ export default function Questions() {
                         {...register("text")}
                         placeholder="Type a question to ask your care team..."
                      />
-                     {errors && (
+                     {errors.text && (
                         <p className="text-sm text-destructive mt-1">
-                           {errors.text?.message}
+                           {errors.text.message}
                         </p>
                      )}
                   </div>
@@ -77,28 +93,62 @@ export default function Questions() {
                )}
                {pending.map((q) => (
                   <Card key={q.id}>
-                     <CardContent className="pt-4 flex justify-between items-center gpa-4">
+                     <CardContent className="pt-4 flex justify-between items-center gap-4">
                         <p className="text-sm flex-1">{q.text}</p>
                         <div className="flex gap-2 shrink-0">
                            <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => markAsked.mutate(q.id)}
+                              onClick={() =>
+                                 markAsked.mutate(q.id, {
+                                    onSuccess: () =>
+                                       toast.success("Marked as asked."),
+                                    onError: () =>
+                                       toast.error("Something went wrong."),
+                                 })
+                              }
                               disabled={markAsked.isPending}
                            >
                               Mark as asked
                            </Button>
-                           <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => {
-                                 if (window.confirm("Delete this question?"))
-                                    deleteQuestion.mutate(q.id);
-                              }}
-                              disabled={deleteQuestion.isPending}
-                           >
-                              Delete
-                           </Button>
+                           <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                 <Button variant="ghost" size="sm">
+                                    Delete
+                                 </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                 <AlertDialogHeader>
+                                    <AlertDialogTitle>
+                                       Delete this question?
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                       This action cannot be undone.
+                                    </AlertDialogDescription>
+                                 </AlertDialogHeader>
+                                 <AlertDialogFooter>
+                                    <AlertDialogCancel>
+                                       Cancel
+                                    </AlertDialogCancel>
+                                    <AlertDialogAction
+                                       onClick={() =>
+                                          deleteQuestion.mutate(q.id, {
+                                             onSuccess: () =>
+                                                toast.success(
+                                                   "Question deleted.",
+                                                ),
+                                             onError: () =>
+                                                toast.error(
+                                                   "Something went wrong.",
+                                                ),
+                                          })
+                                       }
+                                    >
+                                       Delete
+                                    </AlertDialogAction>
+                                 </AlertDialogFooter>
+                              </AlertDialogContent>
+                           </AlertDialog>
                         </div>
                      </CardContent>
                   </Card>

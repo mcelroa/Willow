@@ -8,11 +8,21 @@ import {
 } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+   Popover,
+   PopoverContent,
+   PopoverTrigger,
+} from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm, useWatch } from "react-hook-form";
+import { format, parseISO } from "date-fns";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "lucide-react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { Link } from "react-router";
+import { toast } from "sonner";
 
 const symptomFields = [
    { name: "mood", label: "Mood" },
@@ -24,7 +34,7 @@ const symptomFields = [
 export default function CheckIn() {
    const today = new Date().toISOString().split("T")[0];
 
-   const { createCheckIn } = useCheckIn();
+   const { createCheckIn, checkIns } = useCheckIn();
 
    const {
       register,
@@ -54,10 +64,23 @@ export default function CheckIn() {
       nausea: watchedValues[3],
    };
 
+   const watchedDate = useWatch({ control, name: "date" });
+   const existingEntry = checkIns.find((c) => c.date === watchedDate);
+
    const onSubmit = (data: CheckInSchema) => {
       createCheckIn.mutate(data, {
-         onSuccess: () =>
-            reset({ date: today, mood: 5, pain: 5, fatigue: 5, nausea: 5 }),
+         onSuccess: () => {
+            reset({
+               date: today,
+               mood: 5,
+               pain: 5,
+               fatigue: 5,
+               nausea: 5,
+               notes: "",
+            });
+            toast.success("Check-in saved!");
+         },
+         onError: () => toast.error("Something went wrong"),
       });
    };
 
@@ -74,7 +97,40 @@ export default function CheckIn() {
             >
                <Field>
                   <FieldLabel htmlFor="date">Date</FieldLabel>
-                  <Input id="date" type="date" {...register("date")} />
+                  <Controller
+                     control={control}
+                     name="date"
+                     render={({ field }) => (
+                        <Popover>
+                           <PopoverTrigger asChild>
+                              <Button
+                                 variant="outline"
+                                 className="w-full justify-start text-left font-normal"
+                              >
+                                 <CalendarIcon className="mr-2 h-4 w-4" />
+                                 {field.value
+                                    ? format(parseISO(field.value), "PPP")
+                                    : "Pick a date"}
+                              </Button>
+                           </PopoverTrigger>
+                           <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                 mode="single"
+                                 selected={
+                                    field.value
+                                       ? parseISO(field.value)
+                                       : undefined
+                                 }
+                                 onSelect={(date) =>
+                                    field.onChange(
+                                       date ? format(date, "yyyy-MM-dd") : "",
+                                    )
+                                 }
+                              />
+                           </PopoverContent>
+                        </Popover>
+                     )}
+                  />
                   {errors.date && (
                      <p className="text-sm text-red-500">
                         {errors.date.message}
@@ -113,15 +169,21 @@ export default function CheckIn() {
                </Field>
 
                <div className="flex justify-end items-center gap-3">
-                  {createCheckIn.isSuccess && (
-                     <p className="text-sm text-green-600">Check in saved!</p>
-                  )}
-                  {createCheckIn.isError && (
-                     <p className="text-sm text-red-500">
-                        Something went wrong.
+                  {existingEntry && (
+                     <p className="text-sm text-amber-600">
+                        You already have an entry for this date.{" "}
+                        <Link
+                           to={`/history/${existingEntry.id}`}
+                           className="underline underline-offset-4"
+                        >
+                           Edit it instead
+                        </Link>
                      </p>
                   )}
-                  <Button type="submit" disabled={isSubmitting}>
+                  <Button
+                     type="submit"
+                     disabled={isSubmitting || !!existingEntry}
+                  >
                      {isSubmitting ? "Saving..." : "Save Entry"}
                   </Button>
                </div>

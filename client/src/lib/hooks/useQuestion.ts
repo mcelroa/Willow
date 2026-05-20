@@ -4,7 +4,7 @@ import agent from "../api/agent";
 export const useQuestion = () => {
    const queryClient = useQueryClient();
 
-   const { data: questions = [], isLoading: isLoadingQuestions } = useQuery({
+   const { data: questions = [] as QuestionDto[], isLoading } = useQuery({
       queryKey: ["questions"],
       queryFn: () => agent.Questions.list(),
    });
@@ -32,7 +32,7 @@ export const useQuestion = () => {
 
    return {
       questions,
-      isLoadingQuestions,
+      isLoading,
       createQuestion,
       deleteQuestion,
       markAsked,

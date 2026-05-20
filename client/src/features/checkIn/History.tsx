@@ -1,7 +1,19 @@
+import {
+   AlertDialog,
+   AlertDialogAction,
+   AlertDialogCancel,
+   AlertDialogContent,
+   AlertDialogDescription,
+   AlertDialogFooter,
+   AlertDialogHeader,
+   AlertDialogTitle,
+   AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 const metrics = ["mood", "pain", "fatigue", "nausea"] as const;
 
@@ -47,17 +59,40 @@ export default function History() {
                         >
                            Edit
                         </Button>
-                        <Button
-                           variant="ghost"
-                           size="sm"
-                           onClick={() => {
-                              if (window.confirm("Delete this check-in?"))
-                                 deleteCheckIn.mutate(checkIn.id);
-                           }}
-                           disabled={deleteCheckIn.isPending}
-                        >
-                           Delete
-                        </Button>
+                        <AlertDialog>
+                           <AlertDialogTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                 Delete
+                              </Button>
+                           </AlertDialogTrigger>
+                           <AlertDialogContent>
+                              <AlertDialogHeader>
+                                 <AlertDialogTitle>
+                                    Delete this check-in?
+                                 </AlertDialogTitle>
+                                 <AlertDialogDescription>
+                                    This action cannot be undone.
+                                 </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                 <AlertDialogAction
+                                    onClick={() =>
+                                       deleteCheckIn.mutate(checkIn.id, {
+                                          onSuccess: () =>
+                                             toast.success("Check-in deleted."),
+                                          onError: () =>
+                                             toast.error(
+                                                "Something went wrong.",
+                                             ),
+                                       })
+                                    }
+                                 >
+                                    Delete
+                                 </AlertDialogAction>
+                              </AlertDialogFooter>
+                           </AlertDialogContent>
+                        </AlertDialog>
                      </div>
                   </div>
                   <div className="grid grid-cols-4 gap-2 mt-3">
