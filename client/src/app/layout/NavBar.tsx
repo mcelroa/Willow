@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 
 import { useAccount } from "@/lib/hooks/useAccount";
+import { useTheme } from "@/lib/hooks/useTheme";
+import { Moon, Sun } from "lucide-react";
 import { Link, NavLink } from "react-router";
 
 const navLinks = [
@@ -13,6 +15,7 @@ const navLinks = [
 
 export default function NavBar() {
    const { currentUser, logoutUser } = useAccount();
+   const { isDark, toggleTheme } = useTheme();
 
    return (
       <header className="sticky top-0 w-full border-b bg-background">
@@ -43,6 +46,13 @@ export default function NavBar() {
                </span>
                <Button variant="ghost" onClick={logoutUser}>
                   Log out
+               </Button>
+               <Button variant="ghost" size="icon" onClick={toggleTheme}>
+                  {isDark ? (
+                     <Sun className="h-4 w-4" />
+                  ) : (
+                     <Moon className="h-4 w-4" />
+                  )}
                </Button>
             </div>
          </div>
