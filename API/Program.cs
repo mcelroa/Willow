@@ -77,11 +77,15 @@ app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
 
     context.Response.StatusCode = 500;
 }));
+var allowedOrigins = new List<string> { "http://localhost:3000", "https://localhost:3000" };
+var corsOrigin = builder.Configuration["CORS_ORIGIN"];
+if (!string.IsNullOrEmpty(corsOrigin)) allowedOrigins.Add(corsOrigin);
+
 app.UseCors(x =>
     x.AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials()
-    .WithOrigins("http://localhost:3000", "https://localhost:3000")
+    .WithOrigins([.. allowedOrigins])
 );
 app.UseAuthentication();
 app.UseAuthorization();
