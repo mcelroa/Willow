@@ -3,4 +3,6 @@
   <Project Path="Application/Application.csproj" />
   <Project Path="Domain/Domain.csproj" />
   <Project Path="Persistence/Persistence.csproj" />
+  <Project Path="Tests.Integration/Tests.Integration.csproj" />
+  <Project Path="Tests.Unit/Tests.Unit.csproj" />
 </Solution>
