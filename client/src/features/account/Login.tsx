@@ -27,6 +27,7 @@ export default function Login() {
             <form
                onSubmit={handleSubmit(onSubmit)}
                className="flex flex-col gap-4"
+               noValidate
             >
                <Field>
                   <FieldLabel htmlFor="email">Email</FieldLabel>

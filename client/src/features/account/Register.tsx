@@ -30,6 +30,7 @@ export default function Register() {
             <form
                onSubmit={handleSubmit(onSubmit)}
                className="flex flex-col gap-4"
+               noValidate
             >
                <Field>
                   <FieldLabel htmlFor="username">Username</FieldLabel>
