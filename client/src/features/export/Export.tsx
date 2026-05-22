@@ -21,7 +21,7 @@ export default function Export() {
    };
 
    return (
-      <div className="max-w-2xl mx-auto m-6 flex flex-col gap-4">
+      <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-4">
          <h1 className="text-xl font-semibold">Export</h1>
          <p className="text-sm text-muted-foreground">
             Download a PDF summary of your check-in history and pending

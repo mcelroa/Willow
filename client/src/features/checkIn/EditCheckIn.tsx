@@ -75,7 +75,7 @@ export default function EditCheckIn() {
       );
 
    return (
-      <Card className="max-w-xl mx-auto m-6">
+      <Card className="max-w-xl mx-4 sm:mx-auto my-6">
          <CardHeader>
             <CardTitle>Edit Check In</CardTitle>
             <CardDescription>Update how you were feeling</CardDescription>

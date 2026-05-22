@@ -15,7 +15,12 @@ import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
-const metrics = ["mood", "pain", "fatigue", "nausea"] as const;
+const metrics = [
+   { key: "mood", color: "#3b82f6" },
+   { key: "pain", color: "#ef4444" },
+   { key: "fatigue", color: "#22c55e" },
+   { key: "nausea", color: "#8b5cf6" },
+] as const;
 
 function formatDate(dateStr: string) {
    return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -44,7 +49,7 @@ export default function History() {
    const sorted = [...checkIns].sort((a, b) => b.date.localeCompare(a.date));
 
    return (
-      <div className="max-w-2xl mx-auto m-6 flex flex-col gap-3">
+      <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-3">
          <h1 className="text-xl font-semibold">History</h1>
          {sorted.map((checkIn) => (
             <Card key={checkIn.id}>
@@ -95,17 +100,21 @@ export default function History() {
                         </AlertDialog>
                      </div>
                   </div>
-                  <div className="grid grid-cols-4 gap-2 mt-3">
-                     {metrics.map((metric) => (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
+                     {metrics.map(({ key, color }) => (
                         <div
-                           key={metric}
+                           key={key}
                            className="flex flex-col items-center"
                         >
-                           <span className="text-xs text-muted-foreground capitalize">
-                              {metric}
+                           <span className="flex items-center gap-1 text-xs text-muted-foreground capitalize">
+                              <span
+                                 className="inline-block w-2 h-2 rounded-full shrink-0"
+                                 style={{ backgroundColor: color }}
+                              />
+                              {key}
                            </span>
                            <span className="text-lg font-semibold">
-                              {checkIn[metric]}
+                              {checkIn[key]}
                            </span>
                         </div>
                      ))}

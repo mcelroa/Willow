@@ -57,7 +57,7 @@ export default function Questions() {
    const asked = questions.filter((q) => q.isAsked);
 
    return (
-      <div className="max-w-2xl mx-auto m-6 flex flex-col gap-4">
+      <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-4">
          <h1 className="text-xl font-semibold">Questions</h1>
 
          <Tabs defaultValue="pending">
@@ -93,9 +93,9 @@ export default function Questions() {
                )}
                {pending.map((q) => (
                   <Card key={q.id}>
-                     <CardContent className="pt-4 flex justify-between items-center gap-4">
+                     <CardContent className="pt-4 flex flex-col sm:flex-row sm:items-center gap-3">
                         <p className="text-sm flex-1">{q.text}</p>
-                        <div className="flex gap-2 shrink-0">
+                        <div className="flex gap-2 shrink-0 self-end sm:self-auto">
                            <Button
                               variant="outline"
                               size="sm"

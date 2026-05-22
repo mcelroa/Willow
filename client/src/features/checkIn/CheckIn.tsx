@@ -85,7 +85,7 @@ export default function CheckIn() {
    };
 
    return (
-      <Card className="max-w-xl mx-auto m-6">
+      <Card className="max-w-xl mx-4 sm:mx-auto my-6">
          <CardHeader>
             <CardTitle>Daily Check In</CardTitle>
             <CardDescription>Log how you are feeling today</CardDescription>

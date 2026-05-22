@@ -65,7 +65,7 @@ export default function Trends() {
    }));
 
    return (
-      <div className="max-w-3xl mx-auto m-6 flex flex-col gap-6">
+      <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
          <div className="flex justify-between items-center">
             <h1 className="text-xl font-semibold">Trends</h1>
             <div className="flex gap-1">
@@ -86,7 +86,7 @@ export default function Trends() {
             </div>
          </div>
 
-         <div className="grid grid-cols-4 gap-3">
+         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {metricKeys.map((key) => (
                <Card key={key}>
                   <CardHeader className="pb-1">
