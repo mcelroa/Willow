@@ -28,6 +28,16 @@ dotnet ef migrations remove -p Persistence -s API
 npm run dev       # dev server on http://localhost:3000
 npm run build     # type-check + production build
 npm run lint      # ESLint
+npm run test      # Vitest watch mode
+npm run test:run  # Vitest single run (used in CI)
+```
+
+### Backend tests
+```bash
+dotnet test                                               # run all tests
+dotnet test Tests.Unit                                    # unit tests only
+dotnet test Tests.Integration                             # integration tests only
+dotnet test --filter "FullyQualifiedName~<ClassName>"     # single class
 ```
 
 ## Architecture
@@ -80,17 +90,20 @@ src/
     AppRouter.tsx          # all routes — public and protected
     layout/
       Layout.tsx           # NavBar + Outlet wrapper for protected pages
-      NavBar.tsx
+      NavBar.tsx           # hamburger on mobile/tablet (<lg), full nav on desktop
       RequireAuth.tsx      # redirects to /login if no current user
   features/
-    account/               # Login.tsx, Register.tsx
-    checkIn/               # CheckIn.tsx, EditCheckIn.tsx, History.tsx
-    trends/                # Trends.tsx
+    account/               # Login.tsx, Register.tsx + __tests__/Login.test.tsx
+    checkIn/               # CheckIn.tsx, EditCheckIn.tsx, History.tsx, Trends.tsx
+    export/                # Export.tsx
+    question/              # Questions.tsx
   lib/
     api/agent.ts           # axios instance, interceptor, all API methods grouped by resource
-    hooks/                 # one React Query hook file per feature (useAccount.ts, useCheckIn.ts)
-    schemas/               # Zod schemas (loginSchema.ts, registerSchema.ts, checkInSchema.ts)
+    hooks/                 # one React Query hook file per feature
+    schemas/               # Zod schemas + __tests__/schemas.test.ts
     types/index.d.ts       # global TypeScript types matching backend DTOs
+  test/
+    setup.ts               # imports @testing-library/jest-dom
 ```
 
 ### Adding a new feature
@@ -107,45 +120,20 @@ src/
 10. Add page component in `src/features/<feature>/` and wire up route in `AppRouter.tsx`
 
 ### Config
-- SQLite DB connection string lives in `appsettings.Development.json` (`Data Source=willow.db`)
+- PostgreSQL connection string in `appsettings.Development.json` (`Host=localhost;Port=5432;Database=willow;Username=postgres;Password=postgres`)
 - JWT key lives in `appsettings.Development.json` under `Jwt:Key` — must be ≥ 64 characters for HMAC-SHA512
+- Start local Postgres: `docker compose up postgres -d`
 
-## Next feature: Questions
+## Testing
 
-Users can record questions to ask their oncologist/nurse before appointments. Planned design:
+### Backend — xUnit
+- `Tests.Unit` — handler-level tests using EF Core InMemory + Moq. One file per handler class under `Tests.Unit/CheckIns/` and `Tests.Unit/Questions/`
+- `Tests.Integration` — full HTTP tests via `WebApplicationFactory`. `WillowWebApplicationFactory` swaps Postgres for EF InMemory using `UseInternalServiceProvider` (required to avoid Npgsql/InMemory provider conflict in EF Core 10)
+- `HandleResult(Result<Unit>)` returns **204 NoContent**, not 200 — assert `HttpStatusCode.NoContent` for delete/patch endpoints
+- Reading a plain-string response body: use `ReadAsStringAsync()` then `.Trim('"')` — `Ok(string)` returns `text/plain`, not JSON
 
-### Domain entity (`Domain/Question.cs`)
-```csharp
-public class Question
-{
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    public string Text { get; set; } = "";
-    public bool IsAsked { get; set; } = false;
-    public DateOnly CreatedAt { get; set; }
-    public string UserId { get; set; } = "";
-    public AppUser User { get; set; } = null!;
-}
-```
-
-### Backend
-- `DbSet<Question>` in `AppDbContext`, migration needed
-- `Application/Questions/DTOs/` — `QuestionDto`, `CreateQuestionDto`
-- `Application/Questions/Queries/` — `GetQuestionList` (returns all questions for user)
-- `Application/Questions/Commands/` — `CreateQuestion`, `DeleteQuestion`, `MarkAsked` (flips IsAsked to true)
-- `Application/Questions/Validators/` — validator for `CreateQuestionDto` (Text required)
-- Mappings in `MappingProfiles.cs`
-- `API/Controllers/QuestionsController.cs`
-
-### Frontend
-- Types: `QuestionDto`, `CreateQuestionDto` in `index.d.ts`
-- Agent methods: `Questions.list()`, `Questions.create()`, `Questions.delete()`, `Questions.markAsked()`
-- Hook: `src/lib/hooks/useQuestion.ts`
-- Schema: `src/lib/schemas/questionSchema.ts` (just `text: z.string().min(1)`)
-- Page: `src/features/questions/Questions.tsx` — two tabs (Pending / Asked). Pending tab has an inline text input to add questions. Each pending card has "Mark as asked" and "Delete" buttons. Asked tab is read-only.
-- Route: `/questions` added to `AppRouter.tsx` inside protected Layout route
-
-### API endpoints
-- `GET /api/questions` — list all questions for current user
-- `POST /api/questions` — create question
-- `DELETE /api/questions/{id}` — delete question
-- `PATCH /api/questions/{id}/mark-asked` — mark as asked (no request body needed)
+### Frontend — Vitest + Testing Library
+- Config: `client/vitest.config.ts` — jsdom environment, setup file at `client/src/test/setup.ts`
+- Test files live in `__tests__/` subdirectories alongside the code they test
+- Forms that use React Hook Form must have `noValidate` — without it, browser native constraint validation blocks the submit event before RHF/Zod runs, breaking both the UX and tests
+- Mock hooks with `vi.mock('@/lib/hooks/useX', ...)`, wrap components that use routing in `<MemoryRouter>`

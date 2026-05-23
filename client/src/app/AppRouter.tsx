@@ -8,7 +8,7 @@ import History from "@/features/checkIn/History";
 import EditCheckIn from "@/features/checkIn/EditCheckIn";
 import Trends from "@/features/checkIn/Trends";
 import Questions from "@/features/question/Questions";
-import Export from "@/features/export/Export";
+import Summary from "@/features/export/Summary";
 
 export default function AppRouter() {
    return (
@@ -24,7 +24,7 @@ export default function AppRouter() {
                <Route path="/history/:id" element={<EditCheckIn />} />
                <Route path="/trends" element={<Trends />} />
                <Route path="/questions" element={<Questions />} />
-               <Route path="/export" element={<Export />} />
+               <Route path="/summary" element={<Summary />} />
             </Route>
          </Route>
       </Routes>

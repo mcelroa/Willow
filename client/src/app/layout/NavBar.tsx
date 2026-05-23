@@ -17,7 +17,7 @@ const navLinks = [
    { label: "History", path: "/history" },
    { label: "Trends", path: "/trends" },
    { label: "Questions", path: "/questions" },
-   { label: "Export", path: "/export" },
+   { label: "Summary", path: "/summary" },
 ];
 
 export default function NavBar() {
