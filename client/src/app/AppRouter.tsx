@@ -1,5 +1,7 @@
 import Login from "@/features/account/Login";
 import Register from "@/features/account/Register";
+import ForgotPassword from "@/features/account/ForgotPassword";
+import ResetPassword from "@/features/account/ResetPassword";
 import { Navigate, Route, Routes } from "react-router";
 import RequireAuth from "@/app/layout/RequireAuth";
 import Layout from "@/app/layout/Layout";
@@ -15,6 +17,8 @@ export default function AppRouter() {
       <Routes>
          <Route path="/login" element={<Login />} />
          <Route path="/register" element={<Register />} />
+         <Route path="/forgot-password" element={<ForgotPassword />} />
+         <Route path="/reset-password" element={<ResetPassword />} />
 
          <Route element={<RequireAuth />}>
             <Route element={<Layout />}>

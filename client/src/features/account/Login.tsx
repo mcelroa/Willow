@@ -69,6 +69,14 @@ export default function Login() {
                   Register
                </Link>
             </p>
+            <p className="text-sm text-center text-muted-foreground mt-1">
+               <Link
+                  to="/forgot-password"
+                  className="underline underline-offset-4"
+               >
+                  Forgot your password?
+               </Link>
+            </p>
          </div>
       </div>
    );
