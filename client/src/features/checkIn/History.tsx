@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "sonner";
 
@@ -21,6 +22,8 @@ const metrics = [
    { key: "fatigue", color: "#22c55e" },
    { key: "nausea", color: "#8b5cf6" },
 ] as const;
+
+const PAGE_SIZE = 5;
 
 function formatDate(dateStr: string) {
    return new Date(dateStr).toLocaleDateString("en-GB", {
@@ -33,6 +36,7 @@ function formatDate(dateStr: string) {
 export default function History() {
    const { checkIns, loadingCheckIns, deleteCheckIn } = useCheckIn();
    const navigate = useNavigate();
+   const [page, setPage] = useState(1);
 
    if (loadingCheckIns)
       return (
@@ -48,10 +52,18 @@ export default function History() {
 
    const sorted = [...checkIns].sort((a, b) => b.date.localeCompare(a.date));
 
+   const totalPages = Math.ceil(sorted.length / PAGE_SIZE);
+   // Clamp in case a deletion removed the last item on the final page.
+   const currentPage = Math.min(page, totalPages);
+   const pageItems = sorted.slice(
+      (currentPage - 1) * PAGE_SIZE,
+      currentPage * PAGE_SIZE,
+   );
+
    return (
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-3">
          <h1 className="text-xl font-semibold">History</h1>
-         {sorted.map((checkIn) => (
+         {pageItems.map((checkIn) => (
             <Card key={checkIn.id}>
                <CardContent className="pt-4">
                   <div className="flex justify-between items-start">
@@ -102,10 +114,7 @@ export default function History() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
                      {metrics.map(({ key, color }) => (
-                        <div
-                           key={key}
-                           className="flex flex-col items-center"
-                        >
+                        <div key={key} className="flex flex-col items-center">
                            <span className="flex items-center gap-1 text-xs text-muted-foreground capitalize">
                               <span
                                  className="inline-block w-2 h-2 rounded-full shrink-0"
@@ -135,6 +144,29 @@ export default function History() {
                </CardContent>
             </Card>
          ))}
+         {totalPages > 1 && (
+            <div className="flex items-center justify-between gap-4 mt-3">
+               <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(currentPage - 1)}
+                  disabled={currentPage <= 1}
+               >
+                  Previous
+               </Button>
+               <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {totalPages}
+               </span>
+               <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(currentPage + 1)}
+                  disabled={currentPage >= totalPages}
+               >
+                  Next
+               </Button>
+            </div>
+         )}
       </div>
    );
 }
