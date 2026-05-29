@@ -153,7 +153,9 @@ export default function LandingPage() {
          <footer className="border-t py-6 px-4 sm:px-6 mt-auto">
             <div className="max-w-5xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
                <span>© {new Date().getFullYear()} Willow</span>
-               <span>Made for people who deserve better tools</span>
+               <Link to="/privacy" className="underline underline-offset-4">
+                  Privacy Policy
+               </Link>
             </div>
          </footer>
       </div>

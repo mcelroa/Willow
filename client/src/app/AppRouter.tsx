@@ -14,11 +14,13 @@ import Trends from "@/features/checkIn/Trends";
 import Questions from "@/features/question/Questions";
 import Summary from "@/features/export/Summary";
 import LandingPage from "@/features/landing/LandingPage";
+import PrivacyPolicy from "@/features/landing/PrivacyPolicy";
 
 export default function AppRouter() {
    return (
       <Routes>
          <Route path="/" element={<LandingPage />} />
+         <Route path="/privacy" element={<PrivacyPolicy />} />
          <Route path="/login" element={<Login />} />
          <Route path="/register" element={<Register />} />
          <Route path="/forgot-password" element={<ForgotPassword />} />
