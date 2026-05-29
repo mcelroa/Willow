@@ -1,6 +1,9 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Domain;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Tests.Integration;
 
@@ -15,14 +18,28 @@ public class CheckInsControllerTests : IClassFixture<WillowWebApplicationFactory
 
     private async Task<string> RegisterAndGetTokenAsync()
     {
+        var email = $"{Guid.NewGuid()}@test.com";
         var client = _factory.CreateClient();
-        var response = await client.PostAsJsonAsync("/api/account/register", new
+
+        await client.PostAsJsonAsync("/api/account/register", new
         {
-            email = $"{Guid.NewGuid()}@test.com",
+            email,
             username = Guid.NewGuid().ToString("N")[..10],
             password = "Pa$$w0rd"
         });
-        var body = await response.Content.ReadFromJsonAsync<UserDto>();
+
+        using var scope = _factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var user = await userManager.FindByEmailAsync(email);
+        var confirmToken = await userManager.GenerateEmailConfirmationTokenAsync(user!);
+        await userManager.ConfirmEmailAsync(user!, confirmToken);
+
+        var loginResponse = await client.PostAsJsonAsync("/api/account/login", new
+        {
+            email,
+            password = "Pa$$w0rd"
+        });
+        var body = await loginResponse.Content.ReadFromJsonAsync<UserDto>();
         return body!.Token;
     }
 
