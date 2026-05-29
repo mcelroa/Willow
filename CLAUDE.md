@@ -47,12 +47,13 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 **`API`** — ASP.NET Core host. Key points:
 - `BaseApiController` provides `Mediator` and `HandleResult<T>()` — controllers are thin dispatchers
 - `TokenService` generates JWTs with HMAC-SHA512 (`Jwt:Key` must be ≥ 64 chars)
-- `AccountController` endpoints are `[AllowAnonymous]`; all others use `[Authorize]`
-- `ResendEmailService` sends password reset emails via Resend HTTP API
+- `AccountController` handles all account operations — most endpoints `[AllowAnonymous]`; data endpoints use `[Authorize]`
+- `ResendEmailService` sends password reset and email verification emails via Resend HTTP API
 - Exception middleware catches `ValidationException` → structured `400`
+- Rate limiting via built-in `AddRateLimiter`: `"auth"` policy (5 req/15 min) on login/register/reset-password, `"auth-strict"` (3 req/hr) on forgot-password. Both disabled in the `Testing` environment.
 
 ### Authentication
-JWT stored in `localStorage` under `"jwt"`. Axios interceptor in `agent.ts` attaches it to every request. On app load `useAccount` calls `GET /api/account` to rehydrate the current user.
+JWT stored in `localStorage` under `"jwt"`. Axios interceptor in `agent.ts` attaches it to every request. A response interceptor catches 401s **that had a token attached** (expired/revoked), clears localStorage, and redirects to `/login`. On app load `useAccount` calls `GET /api/account` to rehydrate the current user — this returns 401 if the account's email is not verified.
 
 ### Frontend — React 19 + Vite (`client/`)
 - **React Router v7** — `src/app/AppRouter.tsx`
@@ -68,7 +69,7 @@ src/
     AppRouter.tsx
     layout/         # Layout.tsx, NavBar.tsx, RequireAuth.tsx
   features/
-    account/        # Login, Register, ForgotPassword, ResetPassword
+    account/        # Login, Register, ForgotPassword, ResetPassword, VerifyEmail, ChangePassword
     checkIn/        # CheckIn, EditCheckIn, History, Trends
     export/         # Summary.tsx (stats + PDF export)
     question/       # Questions.tsx
@@ -106,6 +107,8 @@ Start local Postgres: `docker compose up postgres -d`
 - `Tests.Integration` — full HTTP via `WebApplicationFactory`. Uses `UseInternalServiceProvider` to avoid Npgsql/InMemory conflict in EF Core 10
 - `HandleResult(Result<Unit>)` returns **204 NoContent** — assert `HttpStatusCode.NoContent` for delete/patch
 - Plain-string response: `ReadAsStringAsync().Trim('"')` — `Ok(string)` returns `text/plain`
+- Rate limiting is disabled in `Testing` environment — no need to work around it in tests
+- `RegisterAndGetTokenAsync` helper: register → confirm email via `UserManager` directly → login to get JWT (register no longer returns a token)
 
 ### Frontend — Vitest + Testing Library
 - Config: `client/vitest.config.ts`, setup at `client/src/test/setup.ts`
