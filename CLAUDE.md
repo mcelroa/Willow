@@ -71,7 +71,9 @@ src/
   features/
     account/        # Login, Register, ForgotPassword, ResetPassword, VerifyEmail, ChangePassword
     checkIn/        # CheckIn, EditCheckIn, History, Trends
+    errors/         # NotFound.tsx (catch-all 404)
     export/         # Summary.tsx (stats + PDF export)
+    landing/        # LandingPage.tsx, PrivacyPolicy.tsx
     question/       # Questions.tsx
   lib/
     api/agent.ts    # all API methods
