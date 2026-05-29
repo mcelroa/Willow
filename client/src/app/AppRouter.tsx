@@ -15,6 +15,7 @@ import Questions from "@/features/question/Questions";
 import Summary from "@/features/export/Summary";
 import LandingPage from "@/features/landing/LandingPage";
 import PrivacyPolicy from "@/features/landing/PrivacyPolicy";
+import NotFound from "@/features/errors/NotFound";
 
 export default function AppRouter() {
    return (
@@ -38,6 +39,8 @@ export default function AppRouter() {
                <Route path="/change-password" element={<ChangePassword />} />
             </Route>
          </Route>
+
+         <Route path="*" element={<NotFound />} />
       </Routes>
    );
 }

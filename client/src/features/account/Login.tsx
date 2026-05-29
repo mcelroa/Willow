@@ -64,7 +64,7 @@ export default function Login() {
                Don't have an account?{" "}
                <Link
                   to="/register"
-                  className="text-foregorund underline underline-offset-4"
+                  className="text-foreground underline underline-offset-4"
                >
                   Register
                </Link>

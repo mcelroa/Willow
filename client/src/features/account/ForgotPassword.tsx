@@ -13,6 +13,7 @@ import { Link } from "react-router";
 
 export default function ForgotPassword() {
    const [submitted, setSubmitted] = useState(false);
+   const [serverError, setServerError] = useState<string | null>(null);
 
    const {
       register,
@@ -23,8 +24,13 @@ export default function ForgotPassword() {
    });
 
    const onSubmit = async (data: ForgotPasswordSchema) => {
-      await agent.Account.forgotPassword(data);
-      setSubmitted(true);
+      try {
+         setServerError(null);
+         await agent.Account.forgotPassword(data);
+         setSubmitted(true);
+      } catch {
+         setServerError("Something went wrong. Please try again.");
+      }
    };
 
    if (submitted) {
@@ -71,6 +77,9 @@ export default function ForgotPassword() {
                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Sending..." : "Send reset link"}
                </Button>
+               {serverError && (
+                  <p className="text-sm text-red-500 text-center">{serverError}</p>
+               )}
             </form>
             <p className="text-sm text-center text-muted-foreground mt-4">
                <Link
