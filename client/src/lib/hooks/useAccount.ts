@@ -23,9 +23,18 @@ export const useAccount = () => {
 
    const logoutUser = () => {
       localStorage.removeItem("jwt");
-      queryClient.removeQueries({ queryKey: ["user"] });
+      queryClient.clear();
       navigate("/login");
    };
 
-   return { currentUser, loadingUser, loginUser, logoutUser };
+   const deleteAccount = useMutation({
+      mutationFn: () => agent.Account.deleteAccount(),
+      onSuccess: () => {
+         localStorage.removeItem("jwt");
+         queryClient.clear();
+         navigate("/login");
+      },
+   });
+
+   return { currentUser, loadingUser, loginUser, logoutUser, deleteAccount };
 };

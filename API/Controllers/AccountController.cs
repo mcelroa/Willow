@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Persistence;
 
 namespace API.Controllers;
 
@@ -14,9 +15,27 @@ public class AccountController(
     UserManager<AppUser> userManager,
     TokenService tokenService,
     IEmailService emailService,
-    IConfiguration config)
+    IConfiguration config,
+    AppDbContext context)
     : BaseApiController
 {
+    [Authorize]
+    [HttpDelete]
+    public async Task<IActionResult> DeleteAccount()
+    {
+        var user = await userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)!);
+        if (user == null) return Unauthorized();
+
+        context.CheckIns.RemoveRange(context.CheckIns.Where(c => c.UserId == user.Id));
+        context.Questions.RemoveRange(context.Questions.Where(q => q.UserId == user.Id));
+        await context.SaveChangesAsync();
+
+        var result = await userManager.DeleteAsync(user);
+        if (!result.Succeeded) return BadRequest("Failed to delete account");
+
+        return NoContent();
+    }
+
     [Authorize]
     [HttpGet]
     public async Task<ActionResult<UserDto>> GetCurrentUser()

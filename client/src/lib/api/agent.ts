@@ -54,6 +54,7 @@ const agent = {
          const params = new URLSearchParams({ email, token });
          return requests.get<void>(`/account/verify-email?${params}`);
       },
+      deleteAccount: () => requests.delete<void>("/account"),
    },
    CheckIns: {
       list: () => requests.get<CheckIn[]>("/checkins"),

@@ -1,3 +1,13 @@
+import {
+   AlertDialog,
+   AlertDialogAction,
+   AlertDialogCancel,
+   AlertDialogContent,
+   AlertDialogDescription,
+   AlertDialogFooter,
+   AlertDialogHeader,
+   AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import {
    DropdownMenu,
@@ -10,6 +20,7 @@ import {
 import { useAccount } from "@/lib/hooks/useAccount";
 import { useTheme } from "@/lib/hooks/useTheme";
 import { Menu, Moon, Sun } from "lucide-react";
+import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
 const navLinks = [
@@ -21,8 +32,9 @@ const navLinks = [
 ];
 
 export default function NavBar() {
-   const { currentUser, logoutUser } = useAccount();
+   const { currentUser, logoutUser, deleteAccount } = useAccount();
    const { isDark, toggleTheme } = useTheme();
+   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
    const themeToggle = (
       <Button variant="ghost" size="icon" onClick={toggleTheme}>
@@ -31,6 +43,7 @@ export default function NavBar() {
    );
 
    return (
+      <>
       <header className="sticky top-0 z-50 w-full border-b bg-background">
          {/* Desktop */}
          <div className="hidden lg:grid grid-cols-3 w-full px-6 h-14 items-center">
@@ -54,13 +67,26 @@ export default function NavBar() {
                ))}
             </nav>
 
-            <div className="flex justify-end items-center gap-3">
-               <span className="text-sm text-muted-foreground">
-                  {currentUser?.username}
-               </span>
-               <Button variant="ghost" onClick={logoutUser}>
-                  Log out
-               </Button>
+            <div className="flex justify-end items-center gap-2">
+               <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                     <Button variant="ghost" size="sm">
+                        {currentUser?.username}
+                     </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                     <DropdownMenuItem onClick={logoutUser}>
+                        Log out
+                     </DropdownMenuItem>
+                     <DropdownMenuSeparator />
+                     <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setShowDeleteDialog(true)}
+                     >
+                        Delete account
+                     </DropdownMenuItem>
+                  </DropdownMenuContent>
+               </DropdownMenu>
                {themeToggle}
             </div>
          </div>
@@ -89,10 +115,39 @@ export default function NavBar() {
                      <DropdownMenuItem onClick={logoutUser}>
                         Log out
                      </DropdownMenuItem>
+                     <DropdownMenuSeparator />
+                     <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setShowDeleteDialog(true)}
+                     >
+                        Delete account
+                     </DropdownMenuItem>
                   </DropdownMenuContent>
                </DropdownMenu>
             </div>
          </div>
       </header>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+         <AlertDialogContent>
+            <AlertDialogHeader>
+               <AlertDialogTitle>Delete your account?</AlertDialogTitle>
+               <AlertDialogDescription>
+                  This permanently deletes your account and all your check-ins
+                  and questions. This cannot be undone.
+               </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+               <AlertDialogCancel>Cancel</AlertDialogCancel>
+               <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={() => deleteAccount.mutate()}
+               >
+                  Delete account
+               </AlertDialogAction>
+            </AlertDialogFooter>
+         </AlertDialogContent>
+      </AlertDialog>
+      </>
    );
 }
