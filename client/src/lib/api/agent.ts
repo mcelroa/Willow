@@ -54,6 +54,8 @@ const agent = {
          const params = new URLSearchParams({ email, token });
          return requests.get<void>(`/account/verify-email?${params}`);
       },
+      changePassword: (dto: { currentPassword: string; newPassword: string }) =>
+         requests.post<void>("/account/change-password", dto),
       deleteAccount: () => requests.delete<void>("/account"),
    },
    CheckIns: {

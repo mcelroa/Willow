@@ -75,6 +75,9 @@ export default function NavBar() {
                      </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                     <DropdownMenuItem asChild>
+                        <Link to="/change-password">Change password</Link>
+                     </DropdownMenuItem>
                      <DropdownMenuItem onClick={logoutUser}>
                         Log out
                      </DropdownMenuItem>
@@ -112,6 +115,9 @@ export default function NavBar() {
                      <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
                         {currentUser?.username}
                      </DropdownMenuLabel>
+                     <DropdownMenuItem asChild>
+                        <Link to="/change-password">Change password</Link>
+                     </DropdownMenuItem>
                      <DropdownMenuItem onClick={logoutUser}>
                         Log out
                      </DropdownMenuItem>

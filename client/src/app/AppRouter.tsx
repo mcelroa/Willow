@@ -3,6 +3,7 @@ import Register from "@/features/account/Register";
 import ForgotPassword from "@/features/account/ForgotPassword";
 import ResetPassword from "@/features/account/ResetPassword";
 import VerifyEmail from "@/features/account/VerifyEmail";
+import ChangePassword from "@/features/account/ChangePassword";
 import { Navigate, Route, Routes } from "react-router";
 import RequireAuth from "@/app/layout/RequireAuth";
 import Layout from "@/app/layout/Layout";
@@ -31,6 +32,7 @@ export default function AppRouter() {
                <Route path="/trends" element={<Trends />} />
                <Route path="/questions" element={<Questions />} />
                <Route path="/summary" element={<Summary />} />
+               <Route path="/change-password" element={<ChangePassword />} />
             </Route>
          </Route>
       </Routes>

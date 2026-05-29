@@ -20,6 +20,19 @@ public class AccountController(
     : BaseApiController
 {
     [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+    {
+        var user = await userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)!);
+        if (user == null) return Unauthorized();
+
+        var result = await userManager.ChangePasswordAsync(user, dto.CurrentPassword, dto.NewPassword);
+        if (!result.Succeeded) return BadRequest("Current password is incorrect");
+
+        return Ok();
+    }
+
+    [Authorize]
     [HttpDelete]
     public async Task<IActionResult> DeleteAccount()
     {
