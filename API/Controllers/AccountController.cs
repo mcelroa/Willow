@@ -23,6 +23,7 @@ public class AccountController(
     {
         var user = await userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)!);
         if (user == null) return Unauthorized();
+        if (!user.EmailConfirmed) return Unauthorized();
 
         return new UserDto
         {
@@ -30,6 +31,20 @@ public class AccountController(
             Email = user.Email!,
             Token = tokenService.CreateToken(user)
         };
+    }
+
+    [AllowAnonymous]
+    [EnableRateLimiting("auth")]
+    [HttpGet("verify-email")]
+    public async Task<IActionResult> VerifyEmail([FromQuery] string email, [FromQuery] string token)
+    {
+        var user = await userManager.FindByEmailAsync(email);
+        if (user == null) return BadRequest("Invalid verification link");
+
+        var result = await userManager.ConfirmEmailAsync(user, token);
+        if (!result.Succeeded) return BadRequest("Invalid or expired verification link");
+
+        return Ok();
     }
 
     [AllowAnonymous]
@@ -85,7 +100,7 @@ public class AccountController(
     [AllowAnonymous]
     [EnableRateLimiting("auth")]
     [HttpPost("register")]
-    public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
+    public async Task<IActionResult> Register(RegisterDto registerDto)
     {
         var user = new AppUser
         {
@@ -94,14 +109,15 @@ public class AccountController(
         };
 
         var result = await userManager.CreateAsync(user, registerDto.Password);
-
         if (!result.Succeeded) return BadRequest(result.Errors);
 
-        return new UserDto
-        {
-            Username = user.UserName!,
-            Email = user.Email!,
-            Token = tokenService.CreateToken(user)
-        };
+        var token = await userManager.GenerateEmailConfirmationTokenAsync(user);
+        var encodedToken = Uri.EscapeDataString(token);
+        var clientUrl = config["ClientUrl"];
+        var verifyLink = $"{clientUrl}/verify-email?email={Uri.EscapeDataString(registerDto.Email)}&token={encodedToken}";
+
+        await emailService.SendEmailVerificationAsync(registerDto.Email, verifyLink);
+
+        return Ok();
     }
 }

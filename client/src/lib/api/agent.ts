@@ -44,12 +44,16 @@ const agent = {
       login: (creds: LoginDto) =>
          requests.post<UserDto>("/account/login", creds),
       register: (creds: RegisterDto) =>
-         requests.post<UserDto>("/account/register", creds),
+         requests.post<void>("/account/register", creds),
       current: () => requests.get<UserDto>("/account"),
       forgotPassword: (dto: { email: string }) =>
          requests.post<void>("/account/forgot-password", dto),
       resetPassword: (dto: { email: string; token: string; newPassword: string }) =>
          requests.post<void>("/account/reset-password", dto),
+      verifyEmail: (email: string, token: string) => {
+         const params = new URLSearchParams({ email, token });
+         return requests.get<void>(`/account/verify-email?${params}`);
+      },
    },
    CheckIns: {
       list: () => requests.get<CheckIn[]>("/checkins"),

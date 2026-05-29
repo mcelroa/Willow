@@ -1,17 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { useAccount } from "@/lib/hooks/useAccount";
+import agent from "@/lib/api/agent";
 import {
    registerSchema,
    type RegisterSchema,
 } from "@/lib/schemas/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 
 export default function Register() {
-   const { registerUser } = useAccount();
+   const [submitted, setSubmitted] = useState(false);
+   const [serverError, setServerError] = useState<string | null>(null);
 
    const {
       register,
@@ -19,9 +21,35 @@ export default function Register() {
       formState: { errors, isSubmitting },
    } = useForm<RegisterSchema>({ resolver: zodResolver(registerSchema) });
 
-   const onSubmit = (data: RegisterSchema) => {
-      registerUser.mutate(data);
+   const onSubmit = async (data: RegisterSchema) => {
+      setServerError(null);
+      try {
+         await agent.Account.register(data);
+         setSubmitted(true);
+      } catch {
+         setServerError("Registration failed. Please try again.");
+      }
    };
+
+   if (submitted) {
+      return (
+         <div className="flex items-center justify-center min-h-screen">
+            <div className="w-full max-w-sm p-6 border rounded-lg text-center flex flex-col gap-4">
+               <h1 className="text-xl font-semibold">Check your email</h1>
+               <p className="text-sm text-muted-foreground">
+                  We've sent a verification link to your email address. Click
+                  it to activate your account.
+               </p>
+               <Link
+                  to="/login"
+                  className="text-sm underline underline-offset-4 text-muted-foreground"
+               >
+                  Back to sign in
+               </Link>
+            </div>
+         </div>
+      );
+   }
 
    return (
       <div className="flex items-center justify-center min-h-screen">
@@ -66,9 +94,9 @@ export default function Register() {
                <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting ? "Creating account..." : "Create account"}
                </Button>
-               {registerUser.isError && (
+               {serverError && (
                   <p className="text-sm text-red-500 text-center">
-                     Registration failed. Please try again.
+                     {serverError}
                   </p>
                )}
             </form>

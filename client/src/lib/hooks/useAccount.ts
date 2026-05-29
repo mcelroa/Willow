@@ -21,16 +21,11 @@ export const useAccount = () => {
       },
    });
 
-   const registerUser = useMutation({
-      mutationFn: (creds: RegisterDto) => agent.Account.register(creds),
-      onSuccess: () => navigate("/login"),
-   });
-
    const logoutUser = () => {
       localStorage.removeItem("jwt");
       queryClient.removeQueries({ queryKey: ["user"] });
       navigate("/login");
    };
 
-   return { currentUser, loadingUser, loginUser, registerUser, logoutUser };
+   return { currentUser, loadingUser, loginUser, logoutUser };
 };
