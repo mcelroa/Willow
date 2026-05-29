@@ -70,7 +70,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-if (!builder.Environment.IsEnvironment("Testing"))
+if (!builder.Environment.IsEnvironment("Testing") && !builder.Environment.IsDevelopment())
 {
     builder.Services.AddRateLimiter(options =>
     {
@@ -137,7 +137,7 @@ app.UseCors(x =>
 );
 app.UseAuthentication();
 app.UseAuthorization();
-if (!app.Environment.IsEnvironment("Testing")) app.UseRateLimiter();
+if (!app.Environment.IsEnvironment("Testing") && !app.Environment.IsDevelopment()) app.UseRateLimiter();
 app.MapControllers();
 
 if (!app.Environment.IsEnvironment("Testing"))

@@ -6,6 +6,7 @@ using Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.RateLimiting;
 using Persistence;
 
@@ -16,7 +17,9 @@ public class AccountController(
     TokenService tokenService,
     IEmailService emailService,
     IConfiguration config,
-    AppDbContext context)
+    AppDbContext context,
+    IWebHostEnvironment env,
+    ILogger<AccountController> logger)
     : BaseApiController
 {
     [Authorize]
@@ -112,6 +115,7 @@ public class AccountController(
         var resetLink = $"{clientUrl}/reset-password?email={Uri.EscapeDataString(dto.Email)}&token={encodedToken}";
 
         await emailService.SendPasswordResetAsync(dto.Email, resetLink);
+        if (env.IsDevelopment()) logger.LogInformation("Password reset link: {ResetLink}", resetLink);
         return Ok();
     }
 
@@ -149,6 +153,7 @@ public class AccountController(
         var verifyLink = $"{clientUrl}/verify-email?email={Uri.EscapeDataString(registerDto.Email)}&token={encodedToken}";
 
         await emailService.SendEmailVerificationAsync(registerDto.Email, verifyLink);
+        if (env.IsDevelopment()) logger.LogInformation("Email verification link: {VerifyLink}", verifyLink);
 
         return Ok();
     }

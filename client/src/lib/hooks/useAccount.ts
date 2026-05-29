@@ -17,7 +17,7 @@ export const useAccount = () => {
       onSuccess: async (user) => {
          localStorage.setItem("jwt", user.token);
          await queryClient.invalidateQueries({ queryKey: ["user"] });
-         navigate("/");
+         navigate("/checkin");
       },
    });
 

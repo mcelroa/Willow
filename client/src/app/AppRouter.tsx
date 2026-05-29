@@ -4,7 +4,7 @@ import ForgotPassword from "@/features/account/ForgotPassword";
 import ResetPassword from "@/features/account/ResetPassword";
 import VerifyEmail from "@/features/account/VerifyEmail";
 import ChangePassword from "@/features/account/ChangePassword";
-import { Navigate, Route, Routes } from "react-router";
+import { Route, Routes } from "react-router";
 import RequireAuth from "@/app/layout/RequireAuth";
 import Layout from "@/app/layout/Layout";
 import CheckIn from "@/features/checkIn/CheckIn";
@@ -13,10 +13,12 @@ import EditCheckIn from "@/features/checkIn/EditCheckIn";
 import Trends from "@/features/checkIn/Trends";
 import Questions from "@/features/question/Questions";
 import Summary from "@/features/export/Summary";
+import LandingPage from "@/features/landing/LandingPage";
 
 export default function AppRouter() {
    return (
       <Routes>
+         <Route path="/" element={<LandingPage />} />
          <Route path="/login" element={<Login />} />
          <Route path="/register" element={<Register />} />
          <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -25,7 +27,6 @@ export default function AppRouter() {
 
          <Route element={<RequireAuth />}>
             <Route element={<Layout />}>
-               <Route index element={<Navigate to="/checkin" replace />} />
                <Route path="/checkin" element={<CheckIn />} />
                <Route path="/history" element={<History />} />
                <Route path="/history/:id" element={<EditCheckIn />} />
