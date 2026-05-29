@@ -119,6 +119,14 @@ export default function History() {
                         </div>
                      ))}
                   </div>
+                  {checkIn.weight != null && (
+                     <p className="text-sm text-muted-foreground mt-3">
+                        Weight:{" "}
+                        <span className="font-semibold text-foreground">
+                           {checkIn.weight} kg
+                        </span>
+                     </p>
+                  )}
                   {checkIn.notes && (
                      <p className="text-sm text-muted-foreground mt-3 border-t pt-3">
                         {checkIn.notes}

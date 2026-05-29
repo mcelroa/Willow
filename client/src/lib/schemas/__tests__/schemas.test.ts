@@ -58,6 +58,42 @@ describe("checkInSchema", () => {
       });
       expect(result.success).toBe(false);
    });
+
+   it("accepts a valid weight", () => {
+      const result = checkInSchema.safeParse({
+         date: "2025-01-01",
+         mood: 5,
+         pain: 5,
+         fatigue: 5,
+         nausea: 5,
+         weight: 72.5,
+      });
+      expect(result.success).toBe(true);
+   });
+
+   it("accepts a check-in with no weight", () => {
+      const result = checkInSchema.safeParse({
+         date: "2025-01-01",
+         mood: 5,
+         pain: 5,
+         fatigue: 5,
+         nausea: 5,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) expect(result.data.weight).toBeUndefined();
+   });
+
+   it("rejects a weight below the allowed range", () => {
+      const result = checkInSchema.safeParse({
+         date: "2025-01-01",
+         mood: 5,
+         pain: 5,
+         fatigue: 5,
+         nausea: 5,
+         weight: 5,
+      });
+      expect(result.success).toBe(false);
+   });
 });
 
 describe("loginSchema", () => {

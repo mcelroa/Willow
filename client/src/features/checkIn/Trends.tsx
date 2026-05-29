@@ -23,6 +23,10 @@ const chartConfig = {
 
 const metricKeys = ["mood", "pain", "fatigue", "nausea"] as const;
 
+const weightChartConfig = {
+   weight: { label: "Weight (kg)", color: "#f59e0b" },
+} satisfies ChartConfig;
+
 function getFilteredCheckIns(checkIns: CheckIn[], filter: Filter) {
    if (filter === "all") return checkIns;
 
@@ -63,6 +67,16 @@ export default function Trends() {
       fatigue: c.fatigue,
       nausea: c.nausea,
    }));
+
+   const weightData = sorted
+      .filter((c) => c.weight != null)
+      .map((c) => ({
+         date: new Date(c.date).toLocaleDateString("en-GB", {
+            day: "numeric",
+            month: "short",
+         }),
+         weight: c.weight,
+      }));
 
    return (
       <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
@@ -141,6 +155,45 @@ export default function Trends() {
                               dot={false}
                            />
                         ))}
+                     </LineChart>
+                  </ChartContainer>
+               </CardContent>
+            </Card>
+         )}
+
+         {weightData.length >= 2 && (
+            <Card>
+               <CardHeader>
+                  <CardTitle className="text-base">Weight (kg)</CardTitle>
+               </CardHeader>
+               <CardContent>
+                  <ChartContainer
+                     config={weightChartConfig}
+                     className="h-72 w-full"
+                  >
+                     <LineChart data={weightData}>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                        <XAxis
+                           dataKey="date"
+                           tickLine={false}
+                           axisLine={false}
+                           tick={{ fontSize: 12 }}
+                        />
+                        <YAxis
+                           domain={["dataMin - 1", "dataMax + 1"]}
+                           tickLine={false}
+                           axisLine={false}
+                           tick={{ fontSize: 12 }}
+                           width={40}
+                        />
+                        <ChartTooltip content={<ChartTooltipContent />} />
+                        <Line
+                           type="monotone"
+                           dataKey="weight"
+                           stroke="var(--color-weight)"
+                           strokeWidth={2}
+                           dot={false}
+                        />
                      </LineChart>
                   </ChartContainer>
                </CardContent>

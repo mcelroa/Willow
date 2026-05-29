@@ -30,7 +30,7 @@ dotnet test --filter "FullyQualifiedName~<ClassName>"
 
 ## Architecture
 
-Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 1–10) + questions list for care team.
+Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 1–10, plus optional weight in kg) + questions list for care team.
 
 ### Backend — 4 projects
 

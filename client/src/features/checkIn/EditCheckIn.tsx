@@ -42,6 +42,7 @@ export default function EditCheckIn() {
               pain: checkIn.pain,
               fatigue: checkIn.fatigue,
               nausea: checkIn.nausea,
+              weight: checkIn.weight ?? undefined,
               notes: checkIn.notes ?? "",
            }
          : undefined,
@@ -115,6 +116,27 @@ export default function EditCheckIn() {
                      </Field>
                   ))}
                </div>
+
+               <Field>
+                  <FieldLabel htmlFor="weight">Weight (kg)</FieldLabel>
+                  <Input
+                     id="weight"
+                     type="number"
+                     step="0.1"
+                     min={20}
+                     max={400}
+                     placeholder="Optional"
+                     className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                     {...register("weight", {
+                        setValueAs: (v) => (v === "" ? undefined : Number(v)),
+                     })}
+                  />
+                  {errors.weight && (
+                     <p className="text-sm text-red-500">
+                        {errors.weight.message}
+                     </p>
+                  )}
+               </Field>
 
                <Field>
                   <FieldLabel htmlFor="notes">Notes</FieldLabel>

@@ -86,5 +86,69 @@ public class CheckInsControllerTests : IClassFixture<WillowWebApplicationFactory
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    [Fact]
+    public async Task CreateCheckIn_PersistsWeight_WhenProvided()
+    {
+        var token = await RegisterAndGetTokenAsync();
+        var client = CreateAuthenticatedClient(token);
+
+        await client.PostAsJsonAsync("/api/checkins", new
+        {
+            date = "2025-02-02",
+            mood = 6,
+            pain = 4,
+            fatigue = 5,
+            nausea = 3,
+            weight = 72.5
+        });
+
+        var checkIns = await client.GetFromJsonAsync<List<CheckInDto>>("/api/checkins");
+        var saved = Assert.Single(checkIns!, c => c.Date == "2025-02-02");
+        Assert.Equal(72.5m, saved.Weight);
+    }
+
+    [Fact]
+    public async Task CreateCheckIn_AllowsNullWeight()
+    {
+        var token = await RegisterAndGetTokenAsync();
+        var client = CreateAuthenticatedClient(token);
+
+        var response = await client.PostAsJsonAsync("/api/checkins", new
+        {
+            date = "2025-03-03",
+            mood = 6,
+            pain = 4,
+            fatigue = 5,
+            nausea = 3
+        });
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var checkIns = await client.GetFromJsonAsync<List<CheckInDto>>("/api/checkins");
+        var saved = Assert.Single(checkIns!, c => c.Date == "2025-03-03");
+        Assert.Null(saved.Weight);
+    }
+
+    [Fact]
+    public async Task CreateCheckIn_Returns400_WhenWeightOutOfRange()
+    {
+        var token = await RegisterAndGetTokenAsync();
+        var client = CreateAuthenticatedClient(token);
+
+        var response = await client.PostAsJsonAsync("/api/checkins", new
+        {
+            date = "2025-04-04",
+            mood = 6,
+            pain = 4,
+            fatigue = 5,
+            nausea = 3,
+            weight = 5
+        });
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+
     private record UserDto(string Token);
+
+    private record CheckInDto(string Date, decimal? Weight);
 }

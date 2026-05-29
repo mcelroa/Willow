@@ -5,6 +5,7 @@ type CheckIn = {
    pain: number;
    fatigue: number;
    nausea: number;
+   weight?: number;
    date: string;
 };
 
@@ -13,6 +14,7 @@ type SaveCheckInDto = {
    pain: number;
    fatigue: number;
    nausea: number;
+   weight?: number;
    date: string;
    notes?: string;
 };

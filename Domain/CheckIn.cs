@@ -8,6 +8,7 @@ public class CheckIn
     public int Pain { get; set; }
     public int Fatigue { get; set; }
     public int Nausea { get; set; }
+    public decimal? Weight { get; set; }
     public required DateOnly Date { get; set; }
 
     public string UserId { get; set; } = "";

@@ -16,5 +16,9 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
         builder.Entity<CheckIn>()
             .HasIndex(c => new { c.UserId, c.Date })
             .IsUnique();
+
+        builder.Entity<CheckIn>()
+            .Property(c => c.Weight)
+            .HasPrecision(5, 1);
     }
 }

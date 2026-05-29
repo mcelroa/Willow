@@ -76,6 +76,7 @@ export default function CheckIn() {
                pain: 5,
                fatigue: 5,
                nausea: 5,
+               weight: undefined,
                notes: "",
             });
             toast.success("Check-in saved!");
@@ -158,6 +159,40 @@ export default function CheckIn() {
                      </Field>
                   ))}
                </div>
+
+               <Field>
+                  <FieldLabel htmlFor="weight">Weight (kg)</FieldLabel>
+                  <Controller
+                     control={control}
+                     name="weight"
+                     render={({ field }) => (
+                        <Input
+                           id="weight"
+                           type="number"
+                           step="0.1"
+                           min={20}
+                           max={400}
+                           placeholder="Optional"
+                           className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                           value={field.value ?? ""}
+                           onChange={(e) =>
+                              field.onChange(
+                                 e.target.value === ""
+                                    ? undefined
+                                    : Number(e.target.value),
+                              )
+                           }
+                           onBlur={field.onBlur}
+                           ref={field.ref}
+                        />
+                     )}
+                  />
+                  {errors.weight && (
+                     <p className="text-sm text-red-500">
+                        {errors.weight.message}
+                     </p>
+                  )}
+               </Field>
 
                <Field>
                   <FieldLabel htmlFor="notes">Notes</FieldLabel>
