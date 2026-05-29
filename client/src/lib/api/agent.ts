@@ -11,6 +11,19 @@ axiosInstance.interceptors.request.use((config) => {
    return config;
 });
 
+// Clears session and redirects on 401s that had a token attached — meaning the
+// token expired or was revoked, not a credential failure (login wrong password).
+axiosInstance.interceptors.response.use(
+   (response) => response,
+   (error) => {
+      if (error.response?.status === 401 && error.config?.headers?.Authorization) {
+         localStorage.removeItem("jwt");
+         window.location.href = "/login";
+      }
+      return Promise.reject(error);
+   }
+);
+
 // Unwraps response.data so callers get the payload directly, not the full AxiosResponse
 const responseBody = <T>(response: AxiosResponse<T>) => response.data;
 
