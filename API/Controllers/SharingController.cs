@@ -1,5 +1,6 @@
 using Application.Sharing.Commands;
 using Application.Sharing.Queries;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -20,6 +21,10 @@ public class SharingController : BaseApiController
     [HttpDelete("{id}")]
     public async Task<IActionResult> Revoke(string id) =>
         HandleResult(await Mediator.Send(new RevokeShareLink.Command { Id = id }));
+
+    [HttpDelete("revoked")]
+    public async Task<IActionResult> DeleteRevoked() =>
+        HandleResult(await Mediator.Send(new DeleteRevokedLinks.Command()));
 
     [AllowAnonymous]
     [EnableRateLimiting("public-read")]

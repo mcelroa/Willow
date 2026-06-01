@@ -23,10 +23,18 @@ export const useSharing = () => {
       },
    });
 
+   const deleteRevokedLinks = useMutation({
+      mutationFn: () => agent.Sharing.deleteRevoked(),
+      onSuccess: () => {
+         queryClient.invalidateQueries({ queryKey: ["shareLinks"] });
+      },
+   });
+
    return {
       shareLinks,
       isLoading,
       createShareLink,
       revokeShareLink,
+      deleteRevokedLinks,
    };
 };

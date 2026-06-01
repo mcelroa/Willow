@@ -86,6 +86,7 @@ const agent = {
       create: (dto: CreateShareLinkDto) =>
          requests.post<ShareLink>("/sharing", dto),
       revoke: (id: string) => requests.delete<void>(`/sharing/${id}`),
+      deleteRevoked: () => requests.delete<void>("/sharing/revoked"),
       getSharedView: (token: string) =>
          axiosInstance
             .get<SharedView>(`/sharing/view/${token}`)

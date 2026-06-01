@@ -48,7 +48,7 @@ function CopyButton({ token }: { token: string }) {
 }
 
 export default function Sharing() {
-   const { shareLinks, isLoading, createShareLink, revokeShareLink } = useSharing();
+   const { shareLinks, isLoading, createShareLink, revokeShareLink, deleteRevokedLinks } = useSharing();
    const [revokeTargetId, setRevokeTargetId] = useState<string | null>(null);
 
    const {
@@ -169,9 +169,20 @@ export default function Sharing() {
 
                {revokedLinks.length > 0 && (
                   <div className="flex flex-col gap-3">
-                     <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                        Revoked links
-                     </h2>
+                     <div className="flex items-center justify-between">
+                        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                           Revoked links
+                        </h2>
+                        <Button
+                           variant="ghost"
+                           size="sm"
+                           className="text-destructive hover:text-destructive text-xs"
+                           onClick={() => deleteRevokedLinks.mutate()}
+                           disabled={deleteRevokedLinks.isPending}
+                        >
+                           {deleteRevokedLinks.isPending ? "Clearing..." : "Clear all"}
+                        </Button>
+                     </div>
                      {revokedLinks.map((link) => (
                         <Card key={link.id} className="opacity-50">
                            <CardContent>
