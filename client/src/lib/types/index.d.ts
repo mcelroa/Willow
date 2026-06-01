@@ -46,3 +46,34 @@ type QuestionDto = {
 type CreateQuestionDto = {
    text: string;
 };
+
+type ShareLink = {
+   id: string;
+   token: string;
+   label?: string;
+   createdAt: string;
+   expiresAt?: string;
+   isRevoked: boolean;
+   lastViewedAt?: string;
+};
+
+type CreateShareLinkDto = {
+   label?: string;
+   expiresAt?: string;
+};
+
+type MetricAverages = {
+   mood: number;
+   pain: number;
+   fatigue: number;
+   nausea: number;
+};
+
+type SharedView = {
+   ownerName: string;
+   earliestDate?: string;
+   latestDate?: string;
+   checkIns: CheckIn[];
+   pendingQuestions: QuestionDto[];
+   averages?: MetricAverages;
+};

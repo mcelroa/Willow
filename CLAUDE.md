@@ -70,7 +70,7 @@ src/
     layout/         # Layout.tsx, NavBar.tsx, RequireAuth.tsx
   features/
     account/        # Login, Register, ForgotPassword, ResetPassword, VerifyEmail, ChangePassword
-    checkIn/        # CheckIn, EditCheckIn, History, Trends
+    checkIn/        # CheckIn, EditCheckIn, History (paginated client-side, 5/page), Trends
     errors/         # NotFound.tsx (catch-all 404)
     export/         # Summary.tsx (stats + PDF export)
     landing/        # LandingPage.tsx, PrivacyPolicy.tsx

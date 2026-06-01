@@ -8,6 +8,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
 {
     public DbSet<CheckIn> CheckIns { get; set; } = null!;
     public DbSet<Question> Questions { get; set; } = null!;
+    public DbSet<ShareLink> ShareLinks { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -20,5 +21,9 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
         builder.Entity<CheckIn>()
             .Property(c => c.Weight)
             .HasPrecision(5, 1);
+
+        builder.Entity<ShareLink>()
+            .HasIndex(s => s.Token)
+            .IsUnique();
     }
 }

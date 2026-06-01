@@ -1,5 +1,6 @@
 using Application.CheckIns.DTOs;
 using Application.Questions.DTOs;
+using Application.Sharing.DTOs;
 using AutoMapper;
 using Domain;
 
@@ -13,5 +14,7 @@ public class MappingProfiles : Profile
         CreateMap<SaveCheckInDto, CheckIn>();
         CreateMap<Question, QuestionDto>();
         CreateMap<CreateQuestionDto, Question>();
+        CreateMap<ShareLink, ShareLinkDto>()
+            .ForMember(d => d.IsRevoked, o => o.MapFrom(s => s.RevokedAt.HasValue));
     }
 }

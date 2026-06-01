@@ -96,6 +96,17 @@ if (!builder.Environment.IsEnvironment("Testing") && !builder.Environment.IsDeve
                     QueueLimit = 0
                 }));
 
+        // public shared-view endpoint: 30 per minute per IP
+        options.AddPolicy("public-read", context =>
+            RateLimitPartition.GetFixedWindowLimiter(
+                partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                factory: _ => new FixedWindowRateLimiterOptions
+                {
+                    PermitLimit = 30,
+                    Window = TimeSpan.FromMinutes(1),
+                    QueueLimit = 0
+                }));
+
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
     });
 }

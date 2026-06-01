@@ -81,6 +81,16 @@ const agent = {
             .get("/export/pdf", { responseType: "blob" })
             .then((res) => res.data as Blob),
    },
+   Sharing: {
+      list: () => requests.get<ShareLink[]>("/sharing"),
+      create: (dto: CreateShareLinkDto) =>
+         requests.post<ShareLink>("/sharing", dto),
+      revoke: (id: string) => requests.delete<void>(`/sharing/${id}`),
+      getSharedView: (token: string) =>
+         axiosInstance
+            .get<SharedView>(`/sharing/view/${token}`)
+            .then((res) => res.data),
+   },
 };
 
 export default agent;

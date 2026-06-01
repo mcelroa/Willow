@@ -13,6 +13,8 @@ import EditCheckIn from "@/features/checkIn/EditCheckIn";
 import Trends from "@/features/checkIn/Trends";
 import Questions from "@/features/question/Questions";
 import Summary from "@/features/export/Summary";
+import Sharing from "@/features/sharing/Sharing";
+import SharedView from "@/features/sharing/SharedView";
 import LandingPage from "@/features/landing/LandingPage";
 import PrivacyPolicy from "@/features/landing/PrivacyPolicy";
 import NotFound from "@/features/errors/NotFound";
@@ -27,6 +29,7 @@ export default function AppRouter() {
          <Route path="/forgot-password" element={<ForgotPassword />} />
          <Route path="/reset-password" element={<ResetPassword />} />
          <Route path="/verify-email" element={<VerifyEmail />} />
+         <Route path="/share/:token" element={<SharedView />} />
 
          <Route element={<RequireAuth />}>
             <Route element={<Layout />}>
@@ -36,6 +39,7 @@ export default function AppRouter() {
                <Route path="/trends" element={<Trends />} />
                <Route path="/questions" element={<Questions />} />
                <Route path="/summary" element={<Summary />} />
+               <Route path="/sharing" element={<Sharing />} />
                <Route path="/change-password" element={<ChangePassword />} />
             </Route>
          </Route>
