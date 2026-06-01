@@ -34,7 +34,7 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 
 ### Backend — 4 projects
 
-**`Domain`** — plain C# entities. `CheckIn` and `AppUser`.
+**`Domain`** — plain C# entities. `CheckIn`, `AppUser`, and `ShareLink`.
 
 **`Persistence`** — EF Core + PostgreSQL. `AppDbContext` extends `IdentityDbContext<AppUser>`.
 
@@ -50,7 +50,7 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 - `AccountController` handles all account operations — most endpoints `[AllowAnonymous]`; data endpoints use `[Authorize]`
 - `ResendEmailService` sends password reset and email verification emails via Resend HTTP API
 - Exception middleware catches `ValidationException` → structured `400`
-- Rate limiting via built-in `AddRateLimiter`: `"auth"` policy (5 req/15 min) on login/register/reset-password, `"auth-strict"` (3 req/hr) on forgot-password. Both disabled in the `Testing` environment.
+- Rate limiting via built-in `AddRateLimiter`: `"auth"` policy (5 req/15 min) on login/register/reset-password, `"auth-strict"` (3 req/hr) on forgot-password, `"public-read"` (30 req/min) on the anonymous share-view endpoint. All disabled in the `Testing` environment.
 
 ### Authentication
 JWT stored in `localStorage` under `"jwt"`. Axios interceptor in `agent.ts` attaches it to every request. A response interceptor catches 401s **that had a token attached** (expired/revoked), clears localStorage, and redirects to `/login`. On app load `useAccount` calls `GET /api/account` to rehydrate the current user — this returns 401 if the account's email is not verified.
@@ -75,6 +75,7 @@ src/
     export/         # Summary.tsx (stats + PDF export)
     landing/        # LandingPage.tsx, PrivacyPolicy.tsx
     question/       # Questions.tsx
+    sharing/        # Sharing.tsx (management, behind auth), SharedView.tsx (public /share/:token)
   lib/
     api/agent.ts    # all API methods
     hooks/          # one React Query hook file per feature

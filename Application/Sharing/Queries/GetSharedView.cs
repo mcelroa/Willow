@@ -38,22 +38,17 @@ public class GetSharedView
 
             var ownerId = shareLink.UserId;
 
-            var checkInsTask = context.CheckIns
+            var checkIns = await context.CheckIns
                 .Where(c => c.UserId == ownerId)
                 .OrderByDescending(c => c.Date)
                 .ProjectTo<CheckInDto>(mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
 
-            var questionsTask = context.Questions
+            var questions = await context.Questions
                 .Where(q => q.UserId == ownerId && !q.IsAsked)
                 .OrderByDescending(q => q.CreatedAt)
                 .ProjectTo<QuestionDto>(mapper.ConfigurationProvider)
                 .ToListAsync(cancellationToken);
-
-            await Task.WhenAll(checkInsTask, questionsTask);
-
-            var checkIns = await checkInsTask;
-            var questions = await questionsTask;
 
             MetricAverages? averages = null;
             if (checkIns.Count > 0)
