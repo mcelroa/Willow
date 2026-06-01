@@ -73,7 +73,7 @@ src/
     account/        # Login, Register, ForgotPassword, ResetPassword, VerifyEmail, ChangePassword
     checkIn/        # CheckIn, EditCheckIn, History (paginated client-side, 5/page), Trends
     errors/         # NotFound.tsx (catch-all 404)
-    export/         # Summary.tsx (stats + PDF export)
+    export/         # Summary.tsx (stats + PDF export, includes avg weight card when readings exist)
     landing/        # LandingPage.tsx, PrivacyPolicy.tsx
     question/       # Questions.tsx
     sharing/        # Sharing.tsx (management, behind auth), SharedView.tsx (public /share/:token)
