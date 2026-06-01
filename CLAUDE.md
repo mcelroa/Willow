@@ -43,6 +43,7 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 - **`Result<T>`** — all handlers return `Result<T>`, never throw for expected failures
 - **AutoMapper** — `Core/MappingProfiles.cs`. Use `ProjectTo<T>` in queries
 - **FluentValidation** — `ValidationBehaviour<T>` runs validators automatically before every handler
+- **EF Core concurrency** — never run multiple `ToListAsync` calls on the same `DbContext` concurrently (e.g. via `Task.WhenAll`). EF Core throws `InvalidOperationException`. Always await queries sequentially.
 
 **`API`** — ASP.NET Core host. Key points:
 - `BaseApiController` provides `Mediator` and `HandleResult<T>()` — controllers are thin dispatchers

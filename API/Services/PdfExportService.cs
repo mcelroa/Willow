@@ -37,17 +37,27 @@ public class PdfExportService
                         {
                             foreach (var (label, value) in new[]
                             {
-                                ("Mood", data.Averages.Mood),
-                                ("Pain", data.Averages.Pain),
-                                ("Fatigue", data.Averages.Fatigue),
-                                ("Nausea", data.Averages.Nausea),
+                                ("Mood", data.Averages.Mood.ToString("F1")),
+                                ("Pain", data.Averages.Pain.ToString("F1")),
+                                ("Fatigue", data.Averages.Fatigue.ToString("F1")),
+                                ("Nausea", data.Averages.Nausea.ToString("F1")),
                             })
                             {
                                 row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2)
                                     .Padding(8).Column(c =>
                                     {
                                         c.Item().Text(label).FontSize(9).FontColor(Colors.Grey.Medium);
-                                        c.Item().Text(value.ToString("F1")).FontSize(18).Bold();
+                                        c.Item().Text(value).FontSize(18).Bold();
+                                    });
+                            }
+
+                            if (data.Averages.AverageWeight.HasValue)
+                            {
+                                row.RelativeItem().Border(1).BorderColor(Colors.Grey.Lighten2)
+                                    .Padding(8).Column(c =>
+                                    {
+                                        c.Item().Text("Weight (kg)").FontSize(9).FontColor(Colors.Grey.Medium);
+                                        c.Item().Text(data.Averages.AverageWeight.Value.ToString("F1")).FontSize(18).Bold();
                                     });
                             }
                         });
@@ -73,13 +83,14 @@ public class PdfExportService
                                 cols.RelativeColumn(); // Pain
                                 cols.RelativeColumn(); // Fatigue
                                 cols.RelativeColumn(); // Nausea
+                                cols.RelativeColumn(); // Weight
                                 cols.RelativeColumn(3); // Notes
                             });
 
                             // Header row
                             table.Header(header =>
                             {
-                                foreach (var heading in new[] { "Date", "Mood", "Pain", "Fatigue", "Nausea", "Notes" })
+                                foreach (var heading in new[] { "Date", "Mood", "Pain", "Fatigue", "Nausea", "Weight (kg)", "Notes" })
                                 {
                                     header.Cell().Text(heading).Bold();
                                 }
@@ -93,6 +104,7 @@ public class PdfExportService
                                 table.Cell().Text(checkIn.Pain.ToString());
                                 table.Cell().Text(checkIn.Fatigue.ToString());
                                 table.Cell().Text(checkIn.Nausea.ToString());
+                                table.Cell().Text(checkIn.Weight.HasValue ? checkIn.Weight.Value.ToString("F1") : "");
                                 table.Cell().Text(checkIn.Notes ?? "");
                             }
                         });

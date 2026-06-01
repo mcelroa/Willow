@@ -13,6 +13,13 @@ function average(checkIns: CheckIn[], key: (typeof metricKeys)[number]) {
    return avg.toFixed(1);
 }
 
+function weightAverage(checkIns: CheckIn[]) {
+   const withWeight = checkIns.filter((c) => c.weight != null);
+   if (withWeight.length === 0) return null;
+   const avg = withWeight.reduce((sum, c) => sum + c.weight!, 0) / withWeight.length;
+   return avg.toFixed(1);
+}
+
 function formatDate(dateStr: string) {
    return new Date(dateStr).toLocaleDateString("en-GB", {
       day: "numeric",
@@ -45,6 +52,7 @@ export default function Summary() {
    const pendingQuestions = questions.filter((q) => !q.isAsked);
    const earliest = sorted[0];
    const latest = sorted[sorted.length - 1];
+   const avgWeight = weightAverage(checkIns);
 
    return (
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
@@ -112,6 +120,19 @@ export default function Summary() {
                            </CardContent>
                         </Card>
                      ))}
+                     {avgWeight != null && (
+                        <Card>
+                           <CardHeader className="pb-1">
+                              <CardTitle className="text-sm font-medium text-muted-foreground">
+                                 Weight
+                              </CardTitle>
+                           </CardHeader>
+                           <CardContent>
+                              <p className="text-2xl font-bold">{avgWeight}</p>
+                              <p className="text-xs text-muted-foreground">avg kg</p>
+                           </CardContent>
+                        </Card>
+                     )}
                   </div>
                </div>
 

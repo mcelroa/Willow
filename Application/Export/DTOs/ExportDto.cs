@@ -9,6 +9,7 @@ public class MetricAverages
     public double Pain { get; set; }
     public double Fatigue { get; set; }
     public double Nausea { get; set; }
+    public double? AverageWeight { get; set; }
 }
 
 public class ExportDto
