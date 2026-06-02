@@ -18,6 +18,7 @@ vi.mock("@/lib/api/agent", () => ({
          current: vi.fn(),
          login: vi.fn(),
          deleteAccount: vi.fn(),
+         updateSettings: vi.fn(),
       },
    },
 }));
@@ -35,6 +36,7 @@ const mockUser: UserDto = {
    username: "testuser",
    email: "test@example.com",
    token: "mock-jwt-token",
+   reminderEnabled: false,
 };
 
 describe("useAccount", () => {
