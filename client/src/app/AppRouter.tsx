@@ -4,6 +4,7 @@ import ForgotPassword from "@/features/account/ForgotPassword";
 import ResetPassword from "@/features/account/ResetPassword";
 import VerifyEmail from "@/features/account/VerifyEmail";
 import ChangePassword from "@/features/account/ChangePassword";
+import AccountSettings from "@/features/account/AccountSettings";
 import { Route, Routes } from "react-router";
 import RequireAuth from "@/app/layout/RequireAuth";
 import Layout from "@/app/layout/Layout";
@@ -41,6 +42,7 @@ export default function AppRouter() {
                <Route path="/summary" element={<Summary />} />
                <Route path="/sharing" element={<Sharing />} />
                <Route path="/change-password" element={<ChangePassword />} />
+               <Route path="/account/settings" element={<AccountSettings />} />
             </Route>
          </Route>
 

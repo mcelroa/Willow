@@ -30,7 +30,7 @@ dotnet test --filter "FullyQualifiedName~<ClassName>"
 
 ## Architecture
 
-Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 1–10, plus optional weight in kg) + questions list for care team.
+Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 1–10, optional weight in kg, optional free-text notes) + questions list for care team.
 
 ### Backend — 4 projects
 
@@ -108,11 +108,12 @@ Start local Postgres: `docker compose up postgres -d`
 
 ### Backend — xUnit
 - `Tests.Unit` — handler-level, EF Core InMemory + Moq
-- `Tests.Integration` — full HTTP via `WebApplicationFactory`. Uses `UseInternalServiceProvider` to avoid Npgsql/InMemory conflict in EF Core 10
+- `Tests.Integration` — full HTTP via `WebApplicationFactory`. Uses `UseInternalServiceProvider` to avoid Npgsql/InMemory conflict in EF Core 10. Controllers covered: `AccountController`, `CheckInsController`, `QuestionsController`, `SharingController`
 - `HandleResult(Result<Unit>)` returns **204 NoContent** — assert `HttpStatusCode.NoContent` for delete/patch
 - Plain-string response: `ReadAsStringAsync().Trim('"')` — `Ok(string)` returns `text/plain`
 - Rate limiting is disabled in `Testing` environment — no need to work around it in tests
 - `RegisterAndGetTokenAsync` helper: register → confirm email via `UserManager` directly → login to get JWT (register no longer returns a token)
+- Anonymous endpoints (e.g. `GET /api/sharing/view/{token}`) are tested using `_factory.CreateClient()` with no auth header alongside the authenticated tests in the same class
 
 ### Frontend — Vitest + Testing Library
 - Config: `client/vitest.config.ts`, setup at `client/src/test/setup.ts`

@@ -23,6 +23,7 @@ type UserDto = {
    username: string;
    email: string;
    token: string;
+   reminderEnabled: boolean;
 };
 
 type LoginDto = {

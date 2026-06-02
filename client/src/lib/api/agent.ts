@@ -57,6 +57,8 @@ const agent = {
       changePassword: (dto: { currentPassword: string; newPassword: string }) =>
          requests.post<void>("/account/change-password", dto),
       deleteAccount: () => requests.delete<void>("/account"),
+      updateSettings: (dto: { reminderEnabled: boolean }) =>
+         axiosInstance.patch<UserDto>("/account/settings", dto).then(responseBody),
    },
    CheckIns: {
       list: () => requests.get<CheckIn[]>("/checkins"),

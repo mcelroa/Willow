@@ -117,6 +117,7 @@ builder.Services.AddScoped<IEmailService, ResendEmailService>();
 builder.Services.AddScoped<PdfExportService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserAccessor, UserAccessor>();
+builder.Services.AddHostedService<ReminderBackgroundService>();
 
 
 var app = builder.Build();

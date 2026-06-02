@@ -23,6 +23,26 @@ public class AccountController(
     : BaseApiController
 {
     [Authorize]
+    [HttpPatch("settings")]
+    public async Task<ActionResult<UserDto>> UpdateSettings(UpdateSettingsDto dto)
+    {
+        var user = await userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)!);
+        if (user == null) return Unauthorized();
+
+        user.ReminderEnabled = dto.ReminderEnabled;
+        var result = await userManager.UpdateAsync(user);
+        if (!result.Succeeded) return BadRequest("Failed to update settings");
+
+        return new UserDto
+        {
+            Username = user.UserName!,
+            Email = user.Email!,
+            Token = tokenService.CreateToken(user),
+            ReminderEnabled = user.ReminderEnabled
+        };
+    }
+
+    [Authorize]
     [HttpPost("change-password")]
     public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
     {
@@ -64,7 +84,8 @@ public class AccountController(
         {
             Username = user.UserName!,
             Email = user.Email!,
-            Token = tokenService.CreateToken(user)
+            Token = tokenService.CreateToken(user),
+            ReminderEnabled = user.ReminderEnabled
         };
     }
 
@@ -97,7 +118,8 @@ public class AccountController(
         {
             Username = user.UserName!,
             Email = user.Email!,
-            Token = tokenService.CreateToken(user)
+            Token = tokenService.CreateToken(user),
+            ReminderEnabled = user.ReminderEnabled
         };
     }
 

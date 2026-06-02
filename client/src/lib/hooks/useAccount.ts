@@ -36,5 +36,10 @@ export const useAccount = () => {
       },
    });
 
-   return { currentUser, loadingUser, loginUser, logoutUser, deleteAccount };
+   const updateSettings = useMutation({
+      mutationFn: (dto: { reminderEnabled: boolean }) => agent.Account.updateSettings(dto),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user"] }),
+   });
+
+   return { currentUser, loadingUser, loginUser, logoutUser, deleteAccount, updateSettings };
 };

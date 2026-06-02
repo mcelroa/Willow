@@ -81,5 +81,47 @@ public class AccountControllerTests : IClassFixture<WillowWebApplicationFactory>
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
-    private record UserDto(string Token);
+    [Fact]
+    public async Task UpdateSettings_TogglesReminderEnabled()
+    {
+        var client = _factory.CreateClient();
+        var email = $"{Guid.NewGuid()}@test.com";
+
+        await client.PostAsJsonAsync("/api/account/register", new
+        {
+            email,
+            username = Guid.NewGuid().ToString("N")[..10],
+            password = "Pa$$w0rd"
+        });
+
+        using var scope = _factory.Services.CreateScope();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<AppUser>>();
+        var user = await userManager.FindByEmailAsync(email);
+        var confirmToken = await userManager.GenerateEmailConfirmationTokenAsync(user!);
+        await userManager.ConfirmEmailAsync(user!, confirmToken);
+
+        var loginResponse = await client.PostAsJsonAsync("/api/account/login", new
+        {
+            email,
+            password = "Pa$$w0rd"
+        });
+        var loginBody = await loginResponse.Content.ReadFromJsonAsync<UserDto>();
+        client.DefaultRequestHeaders.Authorization =
+            new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", loginBody!.Token);
+
+        // Default should be false
+        var me = await client.GetFromJsonAsync<UserDto>("/api/account");
+        Assert.False(me!.ReminderEnabled);
+
+        // Enable reminder
+        var patchResponse = await client.PatchAsJsonAsync("/api/account/settings",
+            new { reminderEnabled = true });
+        Assert.Equal(HttpStatusCode.OK, patchResponse.StatusCode);
+
+        // Verify persisted
+        var meAfter = await client.GetFromJsonAsync<UserDto>("/api/account");
+        Assert.True(meAfter!.ReminderEnabled);
+    }
+
+    private record UserDto(string Token, bool ReminderEnabled);
 }
