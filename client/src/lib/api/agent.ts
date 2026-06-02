@@ -59,6 +59,9 @@ const agent = {
       deleteAccount: () => requests.delete<void>("/account"),
       updateSettings: (dto: { reminderEnabled: boolean }) =>
          axiosInstance.patch<UserDto>("/account/settings", dto).then(responseBody),
+      markPageToured: (page: string) =>
+         requests.post<void>(`/account/tours/${page}`, {}),
+      resetTours: () => requests.delete<void>("/account/tours"),
    },
    CheckIns: {
       list: () => requests.get<CheckIn[]>("/checkins"),

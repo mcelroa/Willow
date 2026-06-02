@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import TourGuide from "@/components/TourGuide";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useState } from "react";
 import { useNavigate } from "react-router";
@@ -60,7 +61,24 @@ export default function History() {
       currentPage * PAGE_SIZE,
    );
 
+   const tourSteps = [
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "The History page shows all your past check-ins, newest first.",
+         disableBeacon: true,
+      },
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "Each entry shows your symptom scores for that day. You can tap Edit to change an entry, or Delete to remove it. Use the Previous and Next buttons to browse older records.",
+         disableBeacon: true,
+      },
+   ];
+
    return (
+      <>
+      <TourGuide pageName="history" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-3">
          <h1 className="text-xl font-semibold">History</h1>
          {pageItems.map((checkIn) => (
@@ -168,5 +186,6 @@ export default function History() {
             </div>
          )}
       </div>
+      </>
    );
 }

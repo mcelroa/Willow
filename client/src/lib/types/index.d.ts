@@ -24,6 +24,7 @@ type UserDto = {
    email: string;
    token: string;
    reminderEnabled: boolean;
+   touredPages: string[];
 };
 
 type LoginDto = {

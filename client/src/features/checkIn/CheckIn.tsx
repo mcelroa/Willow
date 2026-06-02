@@ -1,3 +1,4 @@
+import TourGuide from "@/components/TourGuide";
 import { Button } from "@/components/ui/button";
 import {
    Card,
@@ -85,7 +86,38 @@ export default function CheckIn() {
       });
    };
 
+   const tourSteps = [
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "Welcome to Willow! Each day, log how you're feeling on this page. Your entries help your care team understand your symptoms over time.",
+         disableBeacon: true,
+      },
+      {
+         target: "#checkin-sliders",
+         content: "Rate your mood, pain, fatigue, and nausea on a scale of 1–10 by dragging each slider. Higher numbers mean more intense symptoms.",
+         disableBeacon: true,
+      },
+      {
+         target: "#checkin-weight",
+         content: "Optionally record your weight in kg. This is tracked separately with its own trend graph.",
+         disableBeacon: true,
+      },
+      {
+         target: "#notes",
+         content: "Add any extra notes — side effects, how you slept, anything on your mind. This is just for you.",
+         disableBeacon: true,
+      },
+      {
+         target: "#checkin-submit",
+         content: "When you're ready, tap Save Entry. You can only submit one entry per date, but you can always edit it later from History.",
+         disableBeacon: true,
+      },
+   ];
+
    return (
+      <>
+      <TourGuide pageName="checkin" steps={tourSteps} />
       <Card className="max-w-xl mx-4 sm:mx-auto my-6">
          <CardHeader>
             <CardTitle>Daily Check In</CardTitle>
@@ -139,7 +171,7 @@ export default function CheckIn() {
                   )}
                </Field>
 
-               <div className="grid grid-cols-2 gap-4">
+               <div id="checkin-sliders" className="grid grid-cols-2 gap-4">
                   {symptomFields.map(({ name, label }) => (
                      <Field key={name}>
                         <div className="flex justify-between">
@@ -160,7 +192,7 @@ export default function CheckIn() {
                   ))}
                </div>
 
-               <Field>
+               <Field id="checkin-weight">
                   <FieldLabel htmlFor="weight">Weight (kg)</FieldLabel>
                   <Controller
                      control={control}
@@ -203,7 +235,7 @@ export default function CheckIn() {
                   />
                </Field>
 
-               <div className="flex justify-end items-center gap-3">
+               <div id="checkin-submit" className="flex justify-end items-center gap-3">
                   {existingEntry && (
                      <p className="text-sm text-amber-600">
                         You already have an entry for this date.{" "}
@@ -225,5 +257,6 @@ export default function CheckIn() {
             </form>
          </CardContent>
       </Card>
+      </>
    );
 }

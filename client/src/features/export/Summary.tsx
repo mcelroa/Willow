@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import TourGuide from "@/components/TourGuide";
 import agent from "@/lib/api/agent";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useQuestion } from "@/lib/hooks/useQuestion";
@@ -54,11 +55,27 @@ export default function Summary() {
    const latest = sorted[sorted.length - 1];
    const avgWeight = weightAverage(checkIns);
 
+   const tourSteps = [
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "The Summary page gives you an overview of all your recorded data in one place — total check-ins, first and latest dates, and all-time averages for each symptom.",
+         disableBeacon: true,
+      },
+      {
+         target: "#summary-pdf",
+         content: "Use Export as PDF to download a full report you can print or bring to your next appointment.",
+         disableBeacon: true,
+      },
+   ];
+
    return (
+      <>
+      <TourGuide pageName="summary" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
          <div className="flex items-center justify-between">
             <h1 className="text-xl font-semibold">Summary</h1>
-            <Button onClick={handleDownload} disabled={isLoading}>
+            <Button id="summary-pdf" onClick={handleDownload} disabled={isLoading}>
                {isLoading ? "Generating..." : "Export as PDF"}
             </Button>
          </div>
@@ -162,5 +179,6 @@ export default function Summary() {
             </>
          )}
       </div>
+      </>
    );
 }

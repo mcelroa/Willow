@@ -1,11 +1,29 @@
+import TourGuide from "@/components/TourGuide";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAccount } from "@/lib/hooks/useAccount";
 
 export default function AccountSettings() {
-   const { currentUser, updateSettings } = useAccount();
+   const { currentUser, updateSettings, resetTours } = useAccount();
+
+   const tourSteps = [
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "Account Settings is where you manage your notification preferences.",
+         disableBeacon: true,
+      },
+      {
+         target: "#reminder-toggle",
+         content: "Turn this on to receive a daily email reminder if you haven't logged a check-in by 6 PM UTC. You can turn it off any time.",
+         disableBeacon: true,
+      },
+   ];
 
    return (
+      <>
+      <TourGuide pageName="account-settings" steps={tourSteps} />
       <div className="max-w-md mx-auto px-4 py-8">
          <h1 className="text-xl font-semibold mb-6">Account settings</h1>
 
@@ -33,6 +51,29 @@ export default function AccountSettings() {
                Something went wrong. Please try again.
             </p>
          )}
+
+         <div className="mt-8 pt-6 border-t flex items-center justify-between gap-4">
+            <div className="flex flex-col gap-1">
+               <p className="text-base font-medium">App tour</p>
+               <p className="text-sm text-muted-foreground">
+                  Replay the guided walkthrough on each page.
+               </p>
+            </div>
+            <Button
+               variant="outline"
+               onClick={() => resetTours.mutate()}
+               disabled={resetTours.isPending}
+            >
+               {resetTours.isPending ? "Resetting..." : "Retake tour"}
+            </Button>
+         </div>
+
+         {resetTours.isError && (
+            <p className="mt-2 text-sm text-destructive">
+               Something went wrong. Please try again.
+            </p>
+         )}
       </div>
+      </>
    );
 }

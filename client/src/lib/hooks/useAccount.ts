@@ -41,5 +41,15 @@ export const useAccount = () => {
       onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user"] }),
    });
 
-   return { currentUser, loadingUser, loginUser, logoutUser, deleteAccount, updateSettings };
+   const markPageToured = useMutation({
+      mutationFn: (page: string) => agent.Account.markPageToured(page),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user"] }),
+   });
+
+   const resetTours = useMutation({
+      mutationFn: () => agent.Account.resetTours(),
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: ["user"] }),
+   });
+
+   return { currentUser, loadingUser, loginUser, logoutUser, deleteAccount, updateSettings, markPageToured, resetTours };
 };

@@ -38,8 +38,42 @@ public class AccountController(
             Username = user.UserName!,
             Email = user.Email!,
             Token = tokenService.CreateToken(user),
-            ReminderEnabled = user.ReminderEnabled
+            ReminderEnabled = user.ReminderEnabled,
+            TouredPages = user.TouredPages.Split(',', StringSplitOptions.RemoveEmptyEntries)
         };
+    }
+
+    [Authorize]
+    [HttpDelete("tours")]
+    public async Task<IActionResult> ResetTours()
+    {
+        var user = await userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)!);
+        if (user == null) return Unauthorized();
+
+        user.TouredPages = "";
+        var result = await userManager.UpdateAsync(user);
+        if (!result.Succeeded) return BadRequest("Failed to reset tours");
+
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpPost("tours/{page}")]
+    public async Task<IActionResult> MarkPageToured(string page)
+    {
+        var user = await userManager.FindByEmailAsync(User.FindFirstValue(ClaimTypes.Email)!);
+        if (user == null) return Unauthorized();
+
+        var toured = user.TouredPages.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList();
+        if (!toured.Contains(page))
+        {
+            toured.Add(page);
+            user.TouredPages = string.Join(',', toured);
+            var result = await userManager.UpdateAsync(user);
+            if (!result.Succeeded) return BadRequest("Failed to update tour status");
+        }
+
+        return NoContent();
     }
 
     [Authorize]
@@ -85,7 +119,8 @@ public class AccountController(
             Username = user.UserName!,
             Email = user.Email!,
             Token = tokenService.CreateToken(user),
-            ReminderEnabled = user.ReminderEnabled
+            ReminderEnabled = user.ReminderEnabled,
+            TouredPages = user.TouredPages.Split(',', StringSplitOptions.RemoveEmptyEntries)
         };
     }
 
@@ -119,7 +154,8 @@ public class AccountController(
             Username = user.UserName!,
             Email = user.Email!,
             Token = tokenService.CreateToken(user),
-            ReminderEnabled = user.ReminderEnabled
+            ReminderEnabled = user.ReminderEnabled,
+            TouredPages = user.TouredPages.Split(',', StringSplitOptions.RemoveEmptyEntries)
         };
     }
 

@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import TourGuide from "@/components/TourGuide";
 import { useQuestion } from "@/lib/hooks/useQuestion";
 import {
    questionSchema,
@@ -56,11 +57,32 @@ export default function Questions() {
    const pending = questions.filter((q) => !q.isAsked);
    const asked = questions.filter((q) => q.isAsked);
 
+   const tourSteps = [
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "Use this page to keep track of questions you want to ask your care team at your next appointment.",
+         disableBeacon: true,
+      },
+      {
+         target: "#questions-form",
+         content: "Type a question here and tap Add — it'll appear in your Pending list below.",
+         disableBeacon: true,
+      },
+      {
+         target: "#questions-tabs",
+         content: "Once you've asked a question at your appointment, mark it as asked and it moves to the Asked tab. Your pending questions also appear in the Summary page.",
+         disableBeacon: true,
+      },
+   ];
+
    return (
+      <>
+      <TourGuide pageName="questions" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-4">
          <h1 className="text-xl font-semibold">Questions</h1>
 
-         <Tabs defaultValue="pending">
+         <Tabs id="questions-tabs" defaultValue="pending">
             <TabsList>
                <TabsTrigger value="pending">
                   Pending ({pending.length})
@@ -69,7 +91,7 @@ export default function Questions() {
             </TabsList>
 
             <TabsContent value="pending" className="flex flex-col gap-4 mt-4">
-               <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
+               <form id="questions-form" onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
                   <div className="flex-1">
                      <Input
                         {...register("text")}
@@ -173,5 +195,6 @@ export default function Questions() {
             </TabsContent>
          </Tabs>
       </div>
+      </>
    );
 }

@@ -8,6 +8,7 @@ import {
    ChartTooltipContent,
    type ChartConfig,
 } from "@/components/ui/chart";
+import TourGuide from "@/components/TourGuide";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useState } from "react";
 import { CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts";
@@ -78,11 +79,32 @@ export default function Trends() {
          weight: c.weight,
       }));
 
+   const tourSteps = [
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "Trends shows how your symptoms have changed over time, so you and your care team can spot patterns.",
+         disableBeacon: true,
+      },
+      {
+         target: "#trends-filter",
+         content: "Switch between the last 7 days, 30 days, or all time to focus on different periods.",
+         disableBeacon: true,
+      },
+      {
+         target: "#trends-stats",
+         content: "These cards show your average score for each symptom in the selected period.",
+         disableBeacon: true,
+      },
+   ];
+
    return (
+      <>
+      <TourGuide pageName="trends" steps={tourSteps} />
       <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
          <div className="flex justify-between items-center">
             <h1 className="text-xl font-semibold">Trends</h1>
-            <div className="flex gap-1">
+            <div id="trends-filter" className="flex gap-1">
                {(["week", "month", "all"] as Filter[]).map((f) => (
                   <Button
                      key={f}
@@ -100,7 +122,7 @@ export default function Trends() {
             </div>
          </div>
 
-         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+         <div id="trends-stats" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {metricKeys.map((key) => (
                <Card key={key}>
                   <CardHeader className="pb-1">
@@ -200,5 +222,6 @@ export default function Trends() {
             </Card>
          )}
       </div>
+      </>
    );
 }

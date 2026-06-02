@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import TourGuide from "@/components/TourGuide";
 import { useSharing } from "@/lib/hooks/useSharing";
 import { shareLinkSchema, type ShareLinkFormValues } from "@/lib/schemas/shareLinkSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -73,14 +74,36 @@ export default function Sharing() {
    const activeLinks = shareLinks.filter((l) => !l.isRevoked);
    const revokedLinks = shareLinks.filter((l) => l.isRevoked);
 
+   const tourSteps = [
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "The Sharing page lets you share a read-only view of your data with caregivers or your care team — no account required on their end.",
+         disableBeacon: true,
+      },
+      {
+         target: "#sharing-create-card",
+         content: "Create a shareable link here. Add a label so you remember who it's for (e.g. 'Dr Smith' or 'Mum'), and optionally set an expiry date.",
+         disableBeacon: true,
+      },
+      {
+         target: "body",
+         placement: "center" as const,
+         content: "Once created, copy the link and send it. You can revoke it at any time to cut off access — the link will stop working immediately.",
+         disableBeacon: true,
+      },
+   ];
+
    return (
+      <>
+      <TourGuide pageName="sharing" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
          <h1 className="text-xl font-semibold">Sharing</h1>
          <p className="text-sm text-muted-foreground -mt-4">
             Share a read-only link with caregivers or your care team — no account required.
          </p>
 
-         <Card>
+         <Card id="sharing-create-card">
             <CardHeader>
                <CardTitle className="text-base">Create a link</CardTitle>
             </CardHeader>
@@ -206,7 +229,8 @@ export default function Sharing() {
             </>
          )}
 
-         <AlertDialog
+      </div>
+      <AlertDialog
             open={revokeTargetId !== null}
             onOpenChange={(open) => { if (!open) setRevokeTargetId(null); }}
          >
@@ -231,6 +255,6 @@ export default function Sharing() {
                </AlertDialogFooter>
             </AlertDialogContent>
          </AlertDialog>
-      </div>
+      </>
    );
 }
