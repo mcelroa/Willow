@@ -17,9 +17,12 @@ public class DeleteRevokedLinks
         {
             var userId = userAccessor.GetUserId();
 
-            await context.ShareLinks
+            var toDelete = await context.ShareLinks
                 .Where(s => s.UserId == userId && s.RevokedAt.HasValue)
-                .ExecuteDeleteAsync(cancellationToken);
+                .ToListAsync(cancellationToken);
+
+            context.ShareLinks.RemoveRange(toDelete);
+            await context.SaveChangesAsync(cancellationToken);
 
             return Result<Unit>.Success(Unit.Value);
         }

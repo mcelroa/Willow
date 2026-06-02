@@ -119,3 +119,4 @@ Start local Postgres: `docker compose up postgres -d`
 - Tests in `__tests__/` subdirectories alongside the code
 - Forms must have `noValidate` — browser validation blocks RHF/Zod otherwise
 - Mock hooks with `vi.mock('@/lib/hooks/useX', ...)`, wrap routed components in `<MemoryRouter>`
+- **Hook tests** — use `renderHook` + a `QueryClientProvider` wrapper (`retry: false` to avoid retries on errors); mock `agent` with `vi.mock('@/lib/api/agent', ...)`; use `waitFor` to await query/mutation state; use `vi.hoisted` to create spies that are safe to reference inside `vi.mock` factories (needed for `mockNavigate` in `useAccount` tests)
