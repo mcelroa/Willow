@@ -11,11 +11,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
+import { ClipboardList } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { toast } from "sonner";
 
 const metrics = [
@@ -40,16 +43,20 @@ export default function History() {
    const navigate = useNavigate();
    const [page, setPage] = useState(1);
 
-   if (loadingCheckIns)
-      return (
-         <p className="text-center mt-12 text-muted-foreground">Loading...</p>
-      );
+   if (loadingCheckIns) return <LoadingSpinner />;
 
    if (checkIns.length === 0)
       return (
-         <p className="text-center mt-12 text-muted-foreground">
-            No check-ins yet
-         </p>
+         <EmptyState
+            icon={ClipboardList}
+            title="No check-ins yet"
+            description="Start tracking how you feel by logging your first daily check-in."
+            action={
+               <Button asChild size="sm">
+                  <Link to="/checkin">Log today's check-in</Link>
+               </Button>
+            }
+         />
       );
 
    const sorted = [...checkIns].sort((a, b) => b.date.localeCompare(a.date));

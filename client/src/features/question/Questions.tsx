@@ -14,8 +14,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TourGuide from "@/components/TourGuide";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
 import { useQuestion } from "@/lib/hooks/useQuestion";
+import { CheckCircle2, MessageCircle } from "lucide-react";
 import {
    questionSchema,
    type QuestionFormValues,
@@ -50,10 +53,7 @@ export default function Questions() {
       );
    };
 
-   if (isLoading)
-      return (
-         <p className="text-center mt-12 text-muted-foreground">Loading...</p>
-      );
+   if (isLoading) return <LoadingSpinner />;
 
    const pending = questions.filter((q) => !q.isAsked);
    const asked = questions.filter((q) => q.isAsked);
@@ -110,9 +110,11 @@ export default function Questions() {
                </form>
 
                {pending.length === 0 && (
-                  <p className="text-center text-muted-foreground mt-6">
-                     No pending questions
-                  </p>
+                  <EmptyState
+                     icon={MessageCircle}
+                     title="No pending questions"
+                     description="Type a question above to add it to your list."
+                  />
                )}
                {pending.map((q) => (
                   <Card key={q.id}>
@@ -180,9 +182,11 @@ export default function Questions() {
 
             <TabsContent value="asked" className="flex flex-col gap-3 mt-4">
                {asked.length === 0 && (
-                  <p className="text-center text-muted-foreground mt-6">
-                     No asked questions yet
-                  </p>
+                  <EmptyState
+                     icon={CheckCircle2}
+                     title="No asked questions yet"
+                     description="Questions you mark as asked at your appointment will appear here."
+                  />
                )}
                {asked.map((q) => (
                   <Card key={q.id}>

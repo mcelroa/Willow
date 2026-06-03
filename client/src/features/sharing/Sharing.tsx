@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { useSharing } from "@/lib/hooks/useSharing";
@@ -152,7 +153,7 @@ export default function Sharing() {
          </Card>
 
          {isLoading ? (
-            <p className="text-center text-muted-foreground">Loading...</p>
+            <LoadingSpinner />
          ) : (
             <>
                {activeLinks.length > 0 && (

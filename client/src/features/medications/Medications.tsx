@@ -19,12 +19,14 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@/components/ui/select";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { cn } from "@/lib/utils";
 import { useMedications } from "@/lib/hooks/useMedications";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Pencil, Plus, Trash2, X } from "lucide-react";
+import { Pencil, Pill, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -430,11 +432,13 @@ export default function Medications() {
             )}
 
             {isLoading ? (
-               <p className="text-center text-muted-foreground">Loading...</p>
+               <LoadingSpinner />
             ) : medications.length === 0 && !showAddForm ? (
-               <p className="text-center text-muted-foreground py-8">
-                  No medications yet. Add one above.
-               </p>
+               <EmptyState
+                  icon={Pill}
+                  title="No medications yet"
+                  description="Add your first medication using the button above."
+               />
             ) : (
                <div className="flex flex-col gap-3">
                   {medications.map((med) =>

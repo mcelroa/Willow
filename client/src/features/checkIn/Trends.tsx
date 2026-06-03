@@ -1,5 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
 import {
    ChartContainer,
@@ -11,6 +13,7 @@ import {
 } from "@/components/ui/chart";
 import TourGuide from "@/components/TourGuide";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
+import { TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { CartesianGrid, XAxis, YAxis, Line, LineChart } from "recharts";
 
@@ -51,10 +54,7 @@ export default function Trends() {
    const { checkIns, loadingCheckIns } = useCheckIn();
    const [filter, setFilter] = useState<Filter>("month");
 
-   if (loadingCheckIns)
-      return (
-         <p className="text-center mt-12 text-muted-foreground">Loading...</p>
-      );
+   if (loadingCheckIns) return <LoadingSpinner />;
 
    const filtered = getFilteredCheckIns(checkIns, filter);
    const sorted = [...filtered].sort((a, b) => a.date.localeCompare(b.date));
@@ -145,9 +145,11 @@ export default function Trends() {
          </div>
 
          {chartData.length < 2 ? (
-            <p className="text-center text-muted-foreground py-12">
-               Not enough data for this period.
-            </p>
+            <EmptyState
+               icon={TrendingUp}
+               title="Not enough data"
+               description="Log at least two check-ins in this period to see your trend chart."
+            />
          ) : (
             <Card>
                <CardHeader>

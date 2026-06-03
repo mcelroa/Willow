@@ -249,6 +249,7 @@ export default function CheckIn() {
                            min={1}
                            max={10}
                            step={1}
+                           style={{ "--range-fill": `${((sliderValues[name] ?? 5) - 1) / 9 * 100}%` } as React.CSSProperties}
                            {...register(name, { valueAsNumber: true })}
                         />
                      </Field>

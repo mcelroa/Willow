@@ -1,11 +1,15 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { EmptyState } from "@/components/EmptyState";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import agent from "@/lib/api/agent";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useQuestion } from "@/lib/hooks/useQuestion";
+import { Activity } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 
 const metricKeys = ["mood", "pain", "fatigue", "nausea"] as const;
 
@@ -85,9 +89,18 @@ export default function Summary() {
          />
 
          {loadingCheckIns ? (
-            <p className="text-center text-muted-foreground">Loading...</p>
+            <LoadingSpinner />
          ) : checkIns.length === 0 ? (
-            <p className="text-muted-foreground">No check-ins recorded yet.</p>
+            <EmptyState
+               icon={Activity}
+               title="No check-ins recorded yet"
+               description="Log your first daily check-in to see your health summary here."
+               action={
+                  <Button asChild size="sm">
+                     <Link to="/checkin">Log today's check-in</Link>
+                  </Button>
+               }
+            />
          ) : (
             <>
                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
