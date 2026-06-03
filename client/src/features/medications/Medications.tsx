@@ -19,6 +19,7 @@ import {
    SelectTrigger,
    SelectValue,
 } from "@/components/ui/select";
+import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { cn } from "@/lib/utils";
 import { useMedications } from "@/lib/hooks/useMedications";
@@ -390,25 +391,23 @@ export default function Medications() {
       <>
          <TourGuide pageName="medications" steps={tourSteps} />
          <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
-            <div className="flex items-center justify-between">
-               <div>
-                  <h1 className="text-xl font-semibold">Medications</h1>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                     Log your prescribed medications and set daily reminders.
-                  </p>
-               </div>
-               {!showAddForm && (
-                  <Button
-                     id="medications-add"
-                     size="sm"
-                     className="gap-1.5 shrink-0"
-                     onClick={() => setShowAddForm(true)}
-                  >
-                     <Plus className="h-4 w-4" />
-                     Add medication
-                  </Button>
-               )}
-            </div>
+            <PageHeader
+               title="Medications"
+               description="Log your prescribed medications and set daily reminders."
+               action={
+                  !showAddForm ? (
+                     <Button
+                        id="medications-add"
+                        size="sm"
+                        className="gap-1.5"
+                        onClick={() => setShowAddForm(true)}
+                     >
+                        <Plus className="h-4 w-4" />
+                        Add medication
+                     </Button>
+                  ) : undefined
+               }
+            />
 
             {showAddForm && (
                <Card id="medications-add">

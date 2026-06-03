@@ -34,7 +34,7 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 
 ### Backend — 4 projects
 
-**`Domain`** — plain C# entities. `CheckIn`, `AppUser`, and `ShareLink`. `AppUser` adds `ReminderEnabled` (bool) and `TouredPages` (string, comma-separated page names — exposed as `string[]` on `UserDto`).
+**`Domain`** — plain C# entities: `CheckIn`, `AppUser`, `ShareLink`, `Medication`, and `MedicationSchedule`. `AppUser` adds `ReminderEnabled` (bool) and `TouredPages` (string, comma-separated page names — exposed as `string[]` on `UserDto`). `Medication` has name, optional dosage, optional targetSymptom, isActive, and a collection of `MedicationSchedule` (dayOfWeek int + TimeOnly time).
 
 **`Persistence`** — EF Core + PostgreSQL. `AppDbContext` extends `IdentityDbContext<AppUser>`.
 
@@ -76,9 +76,11 @@ src/
     errors/         # NotFound.tsx (catch-all 404)
     export/         # Summary.tsx (stats + PDF export, includes avg weight card when readings exist)
     landing/        # LandingPage.tsx, PrivacyPolicy.tsx
+    medications/    # Medications.tsx (CRUD + schedule builder)
     question/       # Questions.tsx
     sharing/        # Sharing.tsx (management, behind auth), SharedView.tsx (public /share/:token)
   components/
+    PageHeader.tsx  # shared page header: title (text-2xl font-bold tracking-tight), optional description, optional action slot
     TourGuide.tsx   # react-joyride v3 wrapper; auto-starts on first visit, marks page toured on finish/skip
   lib/
     api/agent.ts    # all API methods
@@ -111,7 +113,7 @@ Start local Postgres: `docker compose up postgres -d`
 
 ### Backend — xUnit
 - `Tests.Unit` — handler-level, EF Core InMemory + Moq
-- `Tests.Integration` — full HTTP via `WebApplicationFactory`. Uses `UseInternalServiceProvider` to avoid Npgsql/InMemory conflict in EF Core 10. Controllers covered: `AccountController`, `CheckInsController`, `QuestionsController`, `SharingController`
+- `Tests.Integration` — full HTTP via `WebApplicationFactory`. Uses `UseInternalServiceProvider` to avoid Npgsql/InMemory conflict in EF Core 10. Controllers covered: `AccountController`, `CheckInsController`, `QuestionsController`, `SharingController`. `MedicationsController` has no integration tests yet.
 - `HandleResult(Result<Unit>)` returns **204 NoContent** — assert `HttpStatusCode.NoContent` for delete/patch
 - Plain-string response: `ReadAsStringAsync().Trim('"')` — `Ok(string)` returns `text/plain`
 - Rate limiting is disabled in `Testing` environment — no need to work around it in tests

@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useState } from "react";
@@ -80,7 +81,7 @@ export default function History() {
       <>
       <TourGuide pageName="history" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-3">
-         <h1 className="text-xl font-semibold">History</h1>
+         <PageHeader title="History" description="Your past check-ins" />
          {pageItems.map((checkIn) => (
             <Card key={checkIn.id}>
                <CardContent className="pt-4">

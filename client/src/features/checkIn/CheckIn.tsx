@@ -1,12 +1,7 @@
+import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { Button } from "@/components/ui/button";
-import {
-   Card,
-   CardContent,
-   CardDescription,
-   CardHeader,
-   CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
    Dialog,
    DialogContent,
@@ -169,8 +164,10 @@ export default function CheckIn() {
       <>
       <TourGuide pageName="checkin" steps={tourSteps} />
 
-      {todaysMedications.length > 0 && (
-         <div className="max-w-xl mx-4 sm:mx-auto mt-6">
+      <div className="max-w-xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-4">
+         <PageHeader title="Daily check-in" description="Log how you're feeling today" />
+
+         {todaysMedications.length > 0 && (
             <div className="flex items-start gap-2.5 rounded-lg border bg-muted/50 px-4 py-3 text-sm">
                <Pill className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
                <div>
@@ -186,15 +183,10 @@ export default function CheckIn() {
                   </ul>
                </div>
             </div>
-         </div>
-      )}
+         )}
 
-      <Card className="max-w-xl mx-4 sm:mx-auto my-6">
-         <CardHeader>
-            <CardTitle>Daily Check In</CardTitle>
-            <CardDescription>Log how you are feeling today</CardDescription>
-         </CardHeader>
-         <CardContent>
+         <Card>
+         <CardContent className="pt-6">
             <form
                onSubmit={handleSubmit(onSubmit)}
                className="flex flex-col gap-6"
@@ -327,7 +319,8 @@ export default function CheckIn() {
                </div>
             </form>
          </CardContent>
-      </Card>
+         </Card>
+      </div>
 
       <Dialog open={suggestions.length > 0} onOpenChange={(open: boolean) => { if (!open) setSuggestions([]); }}>
          <DialogContent>

@@ -1,3 +1,4 @@
+import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -24,8 +25,8 @@ export default function AccountSettings() {
    return (
       <>
       <TourGuide pageName="account-settings" steps={tourSteps} />
-      <div className="max-w-md mx-auto px-4 py-8">
-         <h1 className="text-xl font-semibold mb-6">Account settings</h1>
+      <div className="max-w-md mx-auto px-4 py-6 flex flex-col gap-6">
+         <PageHeader title="Account settings" description="Manage your notification preferences" />
 
          <div className="flex items-center justify-between gap-4">
             <div className="flex flex-col gap-1">

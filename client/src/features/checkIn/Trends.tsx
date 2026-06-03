@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/PageHeader";
 import {
    ChartContainer,
    ChartLegend,
@@ -102,25 +103,28 @@ export default function Trends() {
       <>
       <TourGuide pageName="trends" steps={tourSteps} />
       <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
-         <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold">Trends</h1>
-            <div id="trends-filter" className="flex gap-1">
-               {(["week", "month", "all"] as Filter[]).map((f) => (
-                  <Button
-                     key={f}
-                     variant={filter === f ? "default" : "ghost"}
-                     size="sm"
-                     onClick={() => setFilter(f)}
-                  >
-                     {f === "week"
-                        ? "7 days"
-                        : f === "month"
-                          ? "30 days"
-                          : "All time"}
-                  </Button>
-               ))}
-            </div>
-         </div>
+         <PageHeader
+            title="Trends"
+            description="How your symptoms change over time"
+            action={
+               <div id="trends-filter" className="flex gap-1">
+                  {(["week", "month", "all"] as Filter[]).map((f) => (
+                     <Button
+                        key={f}
+                        variant={filter === f ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => setFilter(f)}
+                     >
+                        {f === "week"
+                           ? "7 days"
+                           : f === "month"
+                             ? "30 days"
+                             : "All time"}
+                     </Button>
+                  ))}
+               </div>
+            }
+         />
 
          <div id="trends-stats" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {metricKeys.map((key) => (

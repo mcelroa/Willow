@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TourGuide from "@/components/TourGuide";
+import { PageHeader } from "@/components/PageHeader";
 import { useQuestion } from "@/lib/hooks/useQuestion";
 import {
    questionSchema,
@@ -80,7 +81,7 @@ export default function Questions() {
       <>
       <TourGuide pageName="questions" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-4">
-         <h1 className="text-xl font-semibold">Questions</h1>
+         <PageHeader title="Questions" description="Questions to ask your care team" />
 
          <Tabs id="questions-tabs" defaultValue="pending">
             <TabsList>

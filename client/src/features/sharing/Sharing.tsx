@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { useSharing } from "@/lib/hooks/useSharing";
 import { shareLinkSchema, type ShareLinkFormValues } from "@/lib/schemas/shareLinkSchema";
@@ -98,10 +99,10 @@ export default function Sharing() {
       <>
       <TourGuide pageName="sharing" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
-         <h1 className="text-xl font-semibold">Sharing</h1>
-         <p className="text-sm text-muted-foreground -mt-4">
-            Share a read-only link with caregivers or your care team — no account required.
-         </p>
+         <PageHeader
+            title="Sharing"
+            description="Share a read-only link with caregivers or your care team — no account required."
+         />
 
          <Card id="sharing-create-card">
             <CardHeader>

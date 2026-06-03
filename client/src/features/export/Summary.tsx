@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import agent from "@/lib/api/agent";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
@@ -73,12 +74,15 @@ export default function Summary() {
       <>
       <TourGuide pageName="summary" steps={tourSteps} />
       <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
-         <div className="flex items-center justify-between">
-            <h1 className="text-xl font-semibold">Summary</h1>
-            <Button id="summary-pdf" onClick={handleDownload} disabled={isLoading}>
-               {isLoading ? "Generating..." : "Export as PDF"}
-            </Button>
-         </div>
+         <PageHeader
+            title="Summary"
+            description="All-time overview of your health data"
+            action={
+               <Button id="summary-pdf" onClick={handleDownload} disabled={isLoading}>
+                  {isLoading ? "Generating..." : "Export as PDF"}
+               </Button>
+            }
+         />
 
          {loadingCheckIns ? (
             <p className="text-center text-muted-foreground">Loading...</p>
