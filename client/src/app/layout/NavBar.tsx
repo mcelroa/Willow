@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAccount } from "@/lib/hooks/useAccount";
 import { useTheme } from "@/lib/hooks/useTheme";
-import { Menu, Moon, Sun } from "lucide-react";
+import { Leaf, Menu, Moon, Sun } from "lucide-react";
 import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
@@ -46,21 +46,24 @@ export default function NavBar() {
 
    return (
       <>
-      <header className="sticky top-0 z-50 w-full border-b bg-background">
+      <header className="sticky top-0 z-50 w-full border-b border-border/60 bg-background/80 backdrop-blur-md">
          {/* Desktop */}
-         <div className="hidden lg:grid grid-cols-3 w-full px-6 h-14 items-center">
-            <Link to="/">Willow</Link>
+         <div className="hidden lg:grid grid-cols-[auto_1fr_auto] w-full px-6 h-14 items-center gap-6">
+            <Link to="/" className="flex items-center gap-1.5 font-semibold tracking-tight">
+               <Leaf className="h-4 w-4 text-primary" />
+               Willow
+            </Link>
 
-            <nav className="flex justify-center gap-1">
+            <nav className="flex justify-center gap-0.5">
                {navLinks.map(({ label, path }) => (
                   <NavLink
                      key={path}
                      to={path}
                      className={({ isActive }) =>
-                        `px-3 py-1.5 rounded-md text-sm transition-colors ${
+                        `px-3 py-1.5 rounded-md text-sm transition-colors whitespace-nowrap ${
                            isActive
-                              ? "bg-accent text-accent-foreground font-medium"
-                              : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                              ? "bg-primary/15 dark:bg-primary/30 text-foreground font-medium"
+                              : "text-muted-foreground hover:text-foreground hover:bg-accent/60"
                         }`
                      }
                   >
@@ -72,11 +75,17 @@ export default function NavBar() {
             <div className="flex justify-end items-center gap-2">
                <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                     <Button variant="ghost" size="sm">
-                        {currentUser?.username}
+                     <Button variant="ghost" size="icon" className="rounded-full">
+                        <span className="h-7 w-7 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-semibold">
+                           {currentUser?.username?.[0]?.toUpperCase()}
+                        </span>
                      </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                     <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">
+                        {currentUser?.username}
+                     </DropdownMenuLabel>
+                     <DropdownMenuSeparator />
                      <DropdownMenuItem asChild>
                         <Link to="/account/settings">Account settings</Link>
                      </DropdownMenuItem>
@@ -101,7 +110,10 @@ export default function NavBar() {
 
          {/* Mobile/tablet */}
          <div className="flex lg:hidden items-center justify-between px-4 h-14">
-            <Link to="/">Willow</Link>
+            <Link to="/" className="flex items-center gap-1.5 font-semibold tracking-tight">
+               <Leaf className="h-4 w-4 text-primary" />
+               Willow
+            </Link>
             <div className="flex items-center gap-1">
                {themeToggle}
                <DropdownMenu>
