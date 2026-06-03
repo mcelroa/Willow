@@ -20,6 +20,7 @@ import {
    SelectValue,
 } from "@/components/ui/select";
 import TourGuide from "@/components/TourGuide";
+import { cn } from "@/lib/utils";
 import { useMedications } from "@/lib/hooks/useMedications";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil, Plus, Trash2, X } from "lucide-react";
@@ -82,6 +83,40 @@ function MedicationFormFields({
 
    const { fields, append, remove } = useFieldArray({ control, name: "schedules" });
 
+   const [bulkDays, setBulkDays] = useState<number[]>([]);
+   const [bulkTimes, setBulkTimes] = useState<string[]>([]);
+   const [bulkTimeInput, setBulkTimeInput] = useState("08:00");
+
+   const toggleDay = (day: number) =>
+      setBulkDays((prev) =>
+         prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+      );
+
+   const addBulkTime = () => {
+      if (!bulkTimeInput || bulkTimes.includes(bulkTimeInput)) return;
+      setBulkTimes((prev) => [...prev, bulkTimeInput].sort());
+   };
+
+   const addToSchedule = () => {
+      for (const day of [...bulkDays].sort((a, b) => a - b)) {
+         for (const time of bulkTimes) {
+            if (!fields.some((f) => f.dayOfWeek === day && f.time === time)) {
+               append({ dayOfWeek: day, time });
+            }
+         }
+      }
+      setBulkDays([]);
+      setBulkTimes([]);
+   };
+
+   const sortedFields = fields
+      .map((field, index) => ({ field, index }))
+      .sort(
+         (a, b) =>
+            a.field.dayOfWeek - b.field.dayOfWeek ||
+            a.field.time.localeCompare(b.field.time)
+      );
+
    return (
       <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
          <div className="grid sm:grid-cols-2 gap-4">
@@ -128,66 +163,115 @@ function MedicationFormFields({
             </p>
          </div>
 
-         <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between">
-               <Label>Schedule</Label>
+         <div className="flex flex-col gap-3">
+            <Label>Schedule</Label>
+
+            <div className="rounded-md border p-3 flex flex-col gap-3">
+               <div className="flex flex-col gap-1.5">
+                  <p className="text-xs font-medium text-muted-foreground">Days</p>
+                  <div className="flex flex-wrap gap-1.5">
+                     {DAY_LABELS.map((label, i) => (
+                        <button
+                           key={i}
+                           type="button"
+                           onClick={() => toggleDay(i)}
+                           className={cn(
+                              "h-7 px-2.5 rounded text-xs font-medium transition-colors",
+                              bulkDays.includes(i)
+                                 ? "bg-primary text-primary-foreground"
+                                 : "bg-muted text-muted-foreground hover:bg-muted/70"
+                           )}
+                        >
+                           {label}
+                        </button>
+                     ))}
+                  </div>
+               </div>
+
+               <div className="flex flex-col gap-1.5">
+                  <p className="text-xs font-medium text-muted-foreground">Times</p>
+                  <div className="flex items-center gap-2">
+                     <Input
+                        type="time"
+                        className="w-32 h-8 text-sm"
+                        value={bulkTimeInput}
+                        onChange={(e) => setBulkTimeInput(e.target.value)}
+                        onKeyDown={(e) => {
+                           if (e.key === "Enter") {
+                              e.preventDefault();
+                              addBulkTime();
+                           }
+                        }}
+                     />
+                     <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-8 gap-1"
+                        onClick={addBulkTime}
+                     >
+                        <Plus className="h-3 w-3" />
+                        Add
+                     </Button>
+                  </div>
+                  {bulkTimes.length > 0 && (
+                     <div className="flex flex-wrap gap-1.5">
+                        {bulkTimes.map((time) => (
+                           <span
+                              key={time}
+                              className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded"
+                           >
+                              {time}
+                              <button
+                                 type="button"
+                                 onClick={() =>
+                                    setBulkTimes((prev) => prev.filter((t) => t !== time))
+                                 }
+                                 className="text-muted-foreground hover:text-foreground"
+                              >
+                                 <X className="h-3 w-3" />
+                              </button>
+                           </span>
+                        ))}
+                     </div>
+                  )}
+               </div>
+
                <Button
                   type="button"
-                  variant="outline"
                   size="sm"
-                  className="gap-1.5 h-7 text-xs"
-                  onClick={() => append({ dayOfWeek: 1, time: "08:00" })}
+                  variant="secondary"
+                  className="self-start"
+                  disabled={bulkDays.length === 0 || bulkTimes.length === 0}
+                  onClick={addToSchedule}
                >
-                  <Plus className="h-3 w-3" />
-                  Add time slot
+                  Add to schedule
                </Button>
             </div>
 
-            {fields.length === 0 && (
+            {sortedFields.length > 0 ? (
+               <div className="flex flex-wrap gap-1.5">
+                  {sortedFields.map(({ field, index }) => (
+                     <span
+                        key={field.id}
+                        className="inline-flex items-center gap-1 text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded"
+                     >
+                        {DAY_LABELS[field.dayOfWeek]} {field.time}
+                        <button
+                           type="button"
+                           onClick={() => remove(index)}
+                           className="text-muted-foreground hover:text-destructive"
+                        >
+                           <X className="h-3 w-3" />
+                        </button>
+                     </span>
+                  ))}
+               </div>
+            ) : (
                <p className="text-sm text-muted-foreground">
-                  No schedule set. Add a time slot to get reminders on the check-in page.
+                  No schedule set. Select days and times above to add reminders.
                </p>
             )}
-
-            {fields.map((field, index) => (
-               <div key={field.id} className="flex items-center gap-2">
-                  <Controller
-                     control={control}
-                     name={`schedules.${index}.dayOfWeek`}
-                     render={({ field: f }) => (
-                        <Select
-                           value={String(f.value)}
-                           onValueChange={(v: string) => f.onChange(Number(v))}
-                        >
-                           <SelectTrigger className="w-28">
-                              <SelectValue />
-                           </SelectTrigger>
-                           <SelectContent>
-                              {DAY_LABELS.map((label, i) => (
-                                 <SelectItem key={i} value={String(i)}>
-                                    {label}
-                                 </SelectItem>
-                              ))}
-                           </SelectContent>
-                        </Select>
-                     )}
-                  />
-                  <Input
-                     type="time"
-                     className="w-32"
-                     {...register(`schedules.${index}.time`)}
-                  />
-                  <Button
-                     type="button"
-                     variant="ghost"
-                     size="icon"
-                     className="h-8 w-8 shrink-0 text-muted-foreground hover:text-destructive"
-                     onClick={() => remove(index)}
-                  >
-                     <X className="h-4 w-4" />
-                  </Button>
-               </div>
-            ))}
          </div>
 
          <div className="flex justify-end gap-2 pt-2">
