@@ -30,6 +30,7 @@ const navLinks = [
    { label: "Questions", path: "/questions" },
    { label: "Summary", path: "/summary" },
    { label: "Sharing", path: "/sharing" },
+   { label: "Medications", path: "/medications" },
 ];
 
 export default function NavBar() {

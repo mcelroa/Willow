@@ -7,6 +7,14 @@ import {
    CardHeader,
    CardTitle,
 } from "@/components/ui/card";
+import {
+   Dialog,
+   DialogContent,
+   DialogDescription,
+   DialogFooter,
+   DialogHeader,
+   DialogTitle,
+} from "@/components/ui/dialog";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
@@ -16,11 +24,13 @@ import {
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
+import { useMedications } from "@/lib/hooks/useMedications";
 import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Pill } from "lucide-react";
+import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router";
 import { toast } from "sonner";
@@ -32,10 +42,33 @@ const symptomFields = [
    { name: "nausea", label: "Nausea" },
 ] as const;
 
+const SYMPTOM_LABELS: Record<string, string> = {
+   mood: "Mood",
+   pain: "Pain",
+   fatigue: "Fatigue",
+   nausea: "Nausea",
+};
+
 export default function CheckIn() {
    const today = new Date().toISOString().split("T")[0];
+   const todayDow = new Date().getDay();
 
    const { createCheckIn, checkIns } = useCheckIn();
+   const { medications } = useMedications();
+
+   const [suggestions, setSuggestions] = useState<{ symptom: string; meds: string[] }[]>([]);
+
+   const todaysMedications = medications
+      .filter((m) => m.isActive && m.schedules.some((s) => s.dayOfWeek === todayDow))
+      .map((m) => ({
+         name: m.name,
+         dosage: m.dosage,
+         times: m.schedules
+            .filter((s) => s.dayOfWeek === todayDow)
+            .map((s) => s.time)
+            .sort(),
+      }))
+      .sort((a, b) => a.times[0].localeCompare(b.times[0]));
 
    const {
       register,
@@ -81,6 +114,23 @@ export default function CheckIn() {
                notes: "",
             });
             toast.success("Check-in saved!");
+
+            const highSymptoms: { symptom: string; meds: string[] }[] = [];
+            const scores: [string, number][] = [
+               ["mood", data.mood],
+               ["pain", data.pain],
+               ["fatigue", data.fatigue],
+               ["nausea", data.nausea],
+            ];
+            for (const [symptom, score] of scores) {
+               if (score >= 7) {
+                  const relevant = medications
+                     .filter((m) => m.isActive && m.targetSymptom === symptom)
+                     .map((m) => (m.dosage ? `${m.name} ${m.dosage}` : m.name));
+                  if (relevant.length > 0) highSymptoms.push({ symptom, meds: relevant });
+               }
+            }
+            if (highSymptoms.length > 0) setSuggestions(highSymptoms);
          },
          onError: () => toast.error("Something went wrong"),
       });
@@ -118,6 +168,27 @@ export default function CheckIn() {
    return (
       <>
       <TourGuide pageName="checkin" steps={tourSteps} />
+
+      {todaysMedications.length > 0 && (
+         <div className="max-w-xl mx-4 sm:mx-auto mt-6">
+            <div className="flex items-start gap-2.5 rounded-lg border bg-muted/50 px-4 py-3 text-sm">
+               <Pill className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+               <div>
+                  <p className="font-medium mb-1">Medications to take today</p>
+                  <ul className="flex flex-col gap-0.5 text-muted-foreground">
+                     {todaysMedications.map((m, i) => (
+                        <li key={i}>
+                           {m.dosage ? `${m.name} ${m.dosage}` : m.name}
+                           {" — "}
+                           {m.times.join(", ")}
+                        </li>
+                     ))}
+                  </ul>
+               </div>
+            </div>
+         </div>
+      )}
+
       <Card className="max-w-xl mx-4 sm:mx-auto my-6">
          <CardHeader>
             <CardTitle>Daily Check In</CardTitle>
@@ -257,6 +328,29 @@ export default function CheckIn() {
             </form>
          </CardContent>
       </Card>
+
+      <Dialog open={suggestions.length > 0} onOpenChange={(open: boolean) => { if (!open) setSuggestions([]); }}>
+         <DialogContent>
+            <DialogHeader>
+               <DialogTitle>Medication reminder</DialogTitle>
+               <DialogDescription>
+                  You logged a high score for the following symptoms. Your prescribed medications
+                  may help — speak to your care team if you're unsure.
+               </DialogDescription>
+            </DialogHeader>
+            <ul className="flex flex-col gap-2 text-sm">
+               {suggestions.map(({ symptom, meds }) => (
+                  <li key={symptom}>
+                     <span className="font-medium">{SYMPTOM_LABELS[symptom]}:</span>{" "}
+                     {meds.join(", ")}
+                  </li>
+               ))}
+            </ul>
+            <DialogFooter>
+               <Button onClick={() => setSuggestions([])}>Dismiss</Button>
+            </DialogFooter>
+         </DialogContent>
+      </Dialog>
       </>
    );
 }

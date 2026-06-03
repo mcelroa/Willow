@@ -86,6 +86,13 @@ const agent = {
             .get("/export/pdf", { responseType: "blob" })
             .then((res) => res.data as Blob),
    },
+   Medications: {
+      list: () => requests.get<Medication[]>("/medications"),
+      create: (dto: SaveMedicationDto) => requests.post<Medication>("/medications", dto),
+      update: (id: string, dto: SaveMedicationDto) =>
+         requests.put<Medication>(`/medications/${id}`, dto),
+      delete: (id: string) => requests.delete<void>(`/medications/${id}`),
+   },
    Sharing: {
       list: () => requests.get<ShareLink[]>("/sharing"),
       create: (dto: CreateShareLinkDto) =>

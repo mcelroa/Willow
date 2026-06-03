@@ -9,6 +9,8 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
     public DbSet<CheckIn> CheckIns { get; set; } = null!;
     public DbSet<Question> Questions { get; set; } = null!;
     public DbSet<ShareLink> ShareLinks { get; set; } = null!;
+    public DbSet<Medication> Medications { get; set; } = null!;
+    public DbSet<MedicationSchedule> MedicationSchedules { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -25,5 +27,11 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
         builder.Entity<ShareLink>()
             .HasIndex(s => s.Token)
             .IsUnique();
+
+        builder.Entity<Medication>()
+            .HasMany(m => m.Schedules)
+            .WithOne(s => s.Medication)
+            .HasForeignKey(s => s.MedicationId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

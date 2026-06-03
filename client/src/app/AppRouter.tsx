@@ -15,6 +15,7 @@ import Trends from "@/features/checkIn/Trends";
 import Questions from "@/features/question/Questions";
 import Summary from "@/features/export/Summary";
 import Sharing from "@/features/sharing/Sharing";
+import Medications from "@/features/medications/Medications";
 import SharedView from "@/features/sharing/SharedView";
 import LandingPage from "@/features/landing/LandingPage";
 import PrivacyPolicy from "@/features/landing/PrivacyPolicy";
@@ -41,6 +42,7 @@ export default function AppRouter() {
                <Route path="/questions" element={<Questions />} />
                <Route path="/summary" element={<Summary />} />
                <Route path="/sharing" element={<Sharing />} />
+               <Route path="/medications" element={<Medications />} />
                <Route path="/change-password" element={<ChangePassword />} />
                <Route path="/account/settings" element={<AccountSettings />} />
             </Route>

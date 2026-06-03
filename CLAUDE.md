@@ -34,7 +34,7 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 
 ### Backend — 4 projects
 
-**`Domain`** — plain C# entities. `CheckIn`, `AppUser`, and `ShareLink`.
+**`Domain`** — plain C# entities. `CheckIn`, `AppUser`, and `ShareLink`. `AppUser` adds `ReminderEnabled` (bool) and `TouredPages` (string, comma-separated page names — exposed as `string[]` on `UserDto`).
 
 **`Persistence`** — EF Core + PostgreSQL. `AppDbContext` extends `IdentityDbContext<AppUser>`.
 
@@ -49,6 +49,7 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 - `BaseApiController` provides `Mediator` and `HandleResult<T>()` — controllers are thin dispatchers
 - `TokenService` generates JWTs with HMAC-SHA512 (`Jwt:Key` must be ≥ 64 chars)
 - `AccountController` handles all account operations — most endpoints `[AllowAnonymous]`; data endpoints use `[Authorize]`
+- Tour endpoints on `AccountController`: `POST /api/account/tours/{page}` (mark page toured, idempotent), `DELETE /api/account/tours` (reset all tours) — inline, no MediatR
 - `ResendEmailService` sends password reset and email verification emails via Resend HTTP API
 - Exception middleware catches `ValidationException` → structured `400`
 - Rate limiting via built-in `AddRateLimiter`: `"auth"` policy (5 req/15 min) on login/register/reset-password, `"auth-strict"` (3 req/hr) on forgot-password, `"public-read"` (30 req/min) on the anonymous share-view endpoint. All disabled in the `Testing` environment.
@@ -77,6 +78,8 @@ src/
     landing/        # LandingPage.tsx, PrivacyPolicy.tsx
     question/       # Questions.tsx
     sharing/        # Sharing.tsx (management, behind auth), SharedView.tsx (public /share/:token)
+  components/
+    TourGuide.tsx   # react-joyride v3 wrapper; auto-starts on first visit, marks page toured on finish/skip
   lib/
     api/agent.ts    # all API methods
     hooks/          # one React Query hook file per feature

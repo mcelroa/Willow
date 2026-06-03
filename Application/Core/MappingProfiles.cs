@@ -1,4 +1,5 @@
 using Application.CheckIns.DTOs;
+using Application.Medications.DTOs;
 using Application.Questions.DTOs;
 using Application.Sharing.DTOs;
 using AutoMapper;
@@ -16,5 +17,9 @@ public class MappingProfiles : Profile
         CreateMap<CreateQuestionDto, Question>();
         CreateMap<ShareLink, ShareLinkDto>()
             .ForMember(d => d.IsRevoked, o => o.MapFrom(s => s.RevokedAt.HasValue));
+
+        CreateMap<Medication, MedicationDto>();
+        CreateMap<MedicationSchedule, MedicationScheduleDto>()
+            .ForMember(d => d.Time, o => o.MapFrom(s => s.Time.ToString("HH:mm")));
     }
 }
