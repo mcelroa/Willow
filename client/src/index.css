@@ -135,3 +135,11 @@
     @apply font-sans;
     }
 }
+
+.dot-grid {
+  background-image: radial-gradient(circle, oklch(0 0 0 / 0.12) 1px, transparent 1px);
+}
+
+.dark .dot-grid {
+  background-image: radial-gradient(circle, oklch(1 0 0 / 0.12) 1px, transparent 1px);
+}
