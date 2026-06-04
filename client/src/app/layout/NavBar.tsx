@@ -19,7 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useAccount } from "@/lib/hooks/useAccount";
 import { useTheme } from "@/lib/hooks/useTheme";
-import { Leaf, Menu, Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
+import { WillowMark } from "@/components/WillowMark";
 import { useState } from "react";
 import { Link, NavLink } from "react-router";
 
@@ -50,7 +51,7 @@ export default function NavBar() {
          {/* Desktop */}
          <div className="hidden lg:grid grid-cols-[auto_1fr_auto] w-full px-6 h-14 items-center gap-6">
             <Link to="/" className="flex items-center gap-1.5 font-semibold tracking-tight">
-               <Leaf className="h-4 w-4 text-primary" />
+               <WillowMark size={16} variant="small" className="text-primary" />
                Willow
             </Link>
 
@@ -111,7 +112,7 @@ export default function NavBar() {
          {/* Mobile/tablet */}
          <div className="flex lg:hidden items-center justify-between px-4 h-14">
             <Link to="/" className="flex items-center gap-1.5 font-semibold tracking-tight">
-               <Leaf className="h-4 w-4 text-primary" />
+               <WillowMark size={16} variant="small" className="text-primary" />
                Willow
             </Link>
             <div className="flex items-center gap-1">

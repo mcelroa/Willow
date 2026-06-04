@@ -63,6 +63,7 @@ JWT stored in `localStorage` under `"jwt"`. Axios interceptor in `agent.ts` atta
 - **React Hook Form + Zod** — schemas in `src/lib/schemas/`
 - **axios** — `src/lib/api/agent.ts` with Bearer interceptor
 - **shadcn/ui + Tailwind CSS v4**
+- **Range inputs** — `Input` strips box-model classes when `type="range"`; track + thumb styled via pseudo-elements in `index.css`. Pass `style={{ "--range-fill": `${(value - 1) / 9 * 100}%` } as React.CSSProperties}` to get the primary-colored fill up to the thumb position.
 
 ### Folder structure
 ```
@@ -80,8 +81,10 @@ src/
     question/       # Questions.tsx
     sharing/        # Sharing.tsx (management, behind auth), SharedView.tsx (public /share/:token)
   components/
-    PageHeader.tsx  # shared page header: title (text-2xl font-bold tracking-tight), optional description, optional action slot
-    TourGuide.tsx   # react-joyride v3 wrapper; auto-starts on first visit, marks page toured on finish/skip
+    PageHeader.tsx    # shared page header: title (text-2xl font-bold tracking-tight), optional description, optional action slot
+    LoadingSpinner.tsx # centered Loader2 spinner for loading states
+    EmptyState.tsx    # icon + title + optional description + optional action; used for empty lists/no-data states
+    TourGuide.tsx     # react-joyride v3 wrapper; auto-starts on first visit, marks page toured on finish/skip
   lib/
     api/agent.ts    # all API methods
     hooks/          # one React Query hook file per feature
