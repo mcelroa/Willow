@@ -34,7 +34,7 @@ export default function Login() {
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
                <div className="rounded-2xl border bg-card overflow-hidden divide-y">
                   <div className="px-6 py-5">
-                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">Email</p>
+                     <label htmlFor="email" className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3 block">Email</label>
                      <Input id="email" type="email" autoComplete="email" {...register("email")} />
                      {errors.email && (
                         <p className="text-sm text-destructive mt-1.5">{errors.email.message}</p>
@@ -42,7 +42,7 @@ export default function Login() {
                   </div>
                   <div className="px-6 py-5">
                      <div className="flex items-center justify-between mb-3">
-                        <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Password</p>
+                        <label htmlFor="password" className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Password</label>
                         <Link
                            to="/forgot-password"
                            className="text-xs text-muted-foreground underline underline-offset-4 hover:text-foreground"

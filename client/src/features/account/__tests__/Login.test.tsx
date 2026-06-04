@@ -29,7 +29,7 @@ describe("Login", () => {
 
    it("renders the sign in form", () => {
       renderLogin();
-      expect(screen.getByRole("heading", { name: /sign in to willow/i })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /sign in to your account/i })).toBeInTheDocument();
       expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /sign in/i })).toBeInTheDocument();
