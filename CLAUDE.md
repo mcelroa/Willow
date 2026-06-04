@@ -64,6 +64,21 @@ JWT stored in `localStorage` under `"jwt"`. Axios interceptor in `agent.ts` atta
 - **axios** — `src/lib/api/agent.ts` with Bearer interceptor
 - **shadcn/ui + Tailwind CSS v4**
 - **Range inputs** — `Input` strips box-model classes when `type="range"`; track + thumb styled via pseudo-elements in `index.css`. Pass `style={{ "--range-fill": `${(value - 1) / 9 * 100}%` } as React.CSSProperties}` to get the primary-colored fill up to the thumb position.
+- **Fonts** — Figtree (body), JetBrains Mono (mono), Inter, Geist loaded via `@fontsource-variable/`. Lora (serif, display headings on landing page) loaded via Google Fonts CDN in `index.html`.
+
+### UI design system
+
+The app uses a **structured clinical** design language established on the check-in pages. Apply these patterns consistently across all pages:
+
+- **Page container** — `max-w-xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col gap-5` (use `max-w-2xl` for data-heavy pages like History/Trends)
+- **Custom page headers** — For pages where context matters (e.g. showing today's date on CheckIn), use a two-line header instead of `PageHeader`: a small-caps dateline above a bold `h1`. Use `PageHeader` for generic list/settings pages.
+- **Sectioned form containers** — Group form fields into a single `rounded-2xl border bg-card overflow-hidden divide-y` block. Each section gets `px-6 py-5` padding. Never wrap forms in a generic `<Card>`.
+- **Section labels** — `text-xs font-semibold tracking-widest uppercase text-muted-foreground` above each group of fields. Optional detail (e.g. "optional, kg") goes inline as `<span className="normal-case font-normal tracking-normal">`.
+- **Symptom slider rows** — Horizontal layout: `label (w-16 shrink-0) | flex-1 slider | value (w-6 text-right font-bold tabular-nums)`. Score numbers are neutral foreground — no semantic color coding (green/red) since symptoms like mood and pain have opposite polarity.
+- **Submit buttons** — Full-width `w-full h-11 font-semibold`, placed below the sectioned container with `mt-4`. Warnings (e.g. duplicate entry) go in a rounded amber box above the button.
+- **History / list cards** — `rounded-2xl border bg-card overflow-hidden` with a `border-b` header row (`px-5 py-3.5`) for date + actions, a content area for metrics, and an optional `border-t` footer for notes/weight.
+- **Metric grids** — Use `grid grid-cols-4` with centered columns: small-caps label above a `text-2xl font-bold tabular-nums` score.
+- **Back navigation** — Small-caps link with `ArrowLeft` icon: `text-xs font-semibold tracking-widest uppercase text-muted-foreground hover:text-foreground`.
 
 ### Folder structure
 ```
@@ -76,7 +91,7 @@ src/
     checkIn/        # CheckIn, EditCheckIn, History (paginated client-side, 5/page), Trends
     errors/         # NotFound.tsx (catch-all 404)
     export/         # Summary.tsx (stats + PDF export, includes avg weight card when readings exist)
-    landing/        # LandingPage.tsx, PrivacyPolicy.tsx
+    landing/        # LandingPage.tsx (standalone — no Layout wrapper; own nav + deep-green/cream design), PrivacyPolicy.tsx, landing.css (keyframe animations)
     medications/    # Medications.tsx (CRUD + schedule builder)
     question/       # Questions.tsx
     sharing/        # Sharing.tsx (management, behind auth), SharedView.tsx (public /share/:token)
@@ -85,6 +100,7 @@ src/
     LoadingSpinner.tsx # centered Loader2 spinner for loading states
     EmptyState.tsx    # icon + title + optional description + optional action; used for empty lists/no-data states
     TourGuide.tsx     # react-joyride v3 wrapper; auto-starts on first visit, marks page toured on finish/skip
+    WillowMark.tsx    # brand SVG mark; variant="full" (7 fronds, 72px+) or variant="small" (3 fronds, nav-sized); uses currentColor so wrap in a colored element or pass className
   lib/
     api/agent.ts    # all API methods
     hooks/          # one React Query hook file per feature

@@ -1,7 +1,5 @@
-import { PageHeader } from "@/components/PageHeader";
-import TourGuide from "@/components/TourGuide";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
 import {
    Dialog,
    DialogContent,
@@ -10,7 +8,6 @@ import {
    DialogHeader,
    DialogTitle,
 } from "@/components/ui/dialog";
-import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
    Popover,
@@ -18,12 +15,12 @@ import {
    PopoverTrigger,
 } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
+import TourGuide from "@/components/TourGuide";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useMedications } from "@/lib/hooks/useMedications";
 import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon, Pill } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -43,6 +40,7 @@ const SYMPTOM_LABELS: Record<string, string> = {
    fatigue: "Fatigue",
    nausea: "Nausea",
 };
+
 
 export default function CheckIn() {
    const today = new Date().toISOString().split("T")[0];
@@ -164,19 +162,24 @@ export default function CheckIn() {
       <>
       <TourGuide pageName="checkin" steps={tourSteps} />
 
-      <div className="max-w-xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-4">
-         <PageHeader title="Daily check-in" description="Log how you're feeling today" />
+      <div className="max-w-xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col gap-5">
+         <div>
+            <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-1">
+               {format(new Date(), "EEEE, MMMM d")}
+            </p>
+            <h1 className="text-2xl font-bold tracking-tight">Daily check-in</h1>
+         </div>
 
          {todaysMedications.length > 0 && (
-            <div className="flex items-start gap-2.5 rounded-lg border bg-muted/50 px-4 py-3 text-sm">
-               <Pill className="h-4 w-4 mt-0.5 shrink-0 text-muted-foreground" />
+            <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3.5 text-sm">
+               <Pill className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
                <div>
-                  <p className="font-medium mb-1">Medications to take today</p>
+                  <p className="font-semibold text-primary mb-1">Medications today</p>
                   <ul className="flex flex-col gap-0.5 text-muted-foreground">
                      {todaysMedications.map((m, i) => (
                         <li key={i}>
                            {m.dosage ? `${m.name} ${m.dosage}` : m.name}
-                           {" — "}
+                           {" · "}
                            {m.times.join(", ")}
                         </li>
                      ))}
@@ -185,14 +188,12 @@ export default function CheckIn() {
             </div>
          )}
 
-         <Card>
-         <CardContent className="pt-6">
-            <form
-               onSubmit={handleSubmit(onSubmit)}
-               className="flex flex-col gap-6"
-            >
-               <Field>
-                  <FieldLabel htmlFor="date">Date</FieldLabel>
+         <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+               <div className="px-6 py-5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                     Date
+                  </p>
                   <Controller
                      control={control}
                      name="date"
@@ -213,9 +214,7 @@ export default function CheckIn() {
                               <Calendar
                                  mode="single"
                                  selected={
-                                    field.value
-                                       ? parseISO(field.value)
-                                       : undefined
+                                    field.value ? parseISO(field.value) : undefined
                                  }
                                  onSelect={(date) =>
                                     field.onChange(
@@ -228,36 +227,47 @@ export default function CheckIn() {
                      )}
                   />
                   {errors.date && (
-                     <p className="text-sm text-red-500">
-                        {errors.date.message}
-                     </p>
+                     <p className="text-sm text-destructive mt-2">{errors.date.message}</p>
                   )}
-               </Field>
+               </div>
 
-               <div id="checkin-sliders" className="grid grid-cols-2 gap-4">
-                  {symptomFields.map(({ name, label }) => (
-                     <Field key={name}>
-                        <div className="flex justify-between">
-                           <FieldLabel htmlFor={name}>{label}</FieldLabel>
-                           <span className="text-sm font-medium">
+               <div id="checkin-sliders" className="px-6 py-5">
+                  <div className="flex items-center justify-between mb-4">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                        Symptoms
+                     </p>
+                     <span className="text-xs text-muted-foreground">Scale: 1 – 10</span>
+                  </div>
+                  <div className="flex flex-col gap-4">
+                     {symptomFields.map(({ name, label }) => (
+                        <div key={name} className="flex items-center gap-4">
+                           <span className="w-16 shrink-0 text-sm font-medium">{label}</span>
+                           <div className="flex-1">
+                              <Input
+                                 id={name}
+                                 type="range"
+                                 min={1}
+                                 max={10}
+                                 step={1}
+                                 style={{
+                                    "--range-fill": `${((sliderValues[name] ?? 5) - 1) / 9 * 100}%`,
+                                 } as React.CSSProperties}
+                                 {...register(name, { valueAsNumber: true })}
+                              />
+                           </div>
+                           <span className="w-6 shrink-0 text-right text-base font-bold tabular-nums">
                               {sliderValues[name]}
                            </span>
                         </div>
-                        <Input
-                           id={name}
-                           type="range"
-                           min={1}
-                           max={10}
-                           step={1}
-                           style={{ "--range-fill": `${((sliderValues[name] ?? 5) - 1) / 9 * 100}%` } as React.CSSProperties}
-                           {...register(name, { valueAsNumber: true })}
-                        />
-                     </Field>
-                  ))}
+                     ))}
+                  </div>
                </div>
 
-               <Field id="checkin-weight">
-                  <FieldLabel htmlFor="weight">Weight (kg)</FieldLabel>
+               <div id="checkin-weight" className="px-6 py-5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                     Weight{" "}
+                     <span className="normal-case font-normal tracking-normal">(optional, kg)</span>
+                  </p>
                   <Controller
                      control={control}
                      name="weight"
@@ -268,8 +278,8 @@ export default function CheckIn() {
                            step="0.1"
                            min={20}
                            max={400}
-                           placeholder="Optional"
-                           className="[appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                           placeholder="e.g. 68.5"
+                           className="max-w-40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                            value={field.value ?? ""}
                            onChange={(e) =>
                               field.onChange(
@@ -284,46 +294,54 @@ export default function CheckIn() {
                      )}
                   />
                   {errors.weight && (
-                     <p className="text-sm text-red-500">
-                        {errors.weight.message}
-                     </p>
+                     <p className="text-sm text-destructive mt-2">{errors.weight.message}</p>
                   )}
-               </Field>
+               </div>
 
-               <Field>
-                  <FieldLabel htmlFor="notes">Notes</FieldLabel>
+               <div className="px-6 py-5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                     Notes{" "}
+                     <span className="normal-case font-normal tracking-normal">(optional)</span>
+                  </p>
                   <Textarea
                      id="notes"
                      placeholder="Anything notable today?"
+                     className="resize-none"
+                     rows={3}
                      {...register("notes")}
                   />
-               </Field>
-
-               <div id="checkin-submit" className="flex justify-end items-center gap-3">
-                  {existingEntry && (
-                     <p className="text-sm text-amber-600">
-                        You already have an entry for this date.{" "}
-                        <Link
-                           to={`/history/${existingEntry.id}`}
-                           className="underline underline-offset-4"
-                        >
-                           Edit it instead
-                        </Link>
-                     </p>
-                  )}
-                  <Button
-                     type="submit"
-                     disabled={isSubmitting || !!existingEntry}
-                  >
-                     {isSubmitting ? "Saving..." : "Save Entry"}
-                  </Button>
                </div>
-            </form>
-         </CardContent>
-         </Card>
+            </div>
+
+            <div id="checkin-submit" className="mt-4 flex flex-col gap-2.5">
+               {existingEntry && (
+                  <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-4 py-3 text-sm text-amber-800 dark:text-amber-400 text-center">
+                     You already have an entry for this date.{" "}
+                     <Link
+                        to={`/history/${existingEntry.id}`}
+                        className="underline underline-offset-4 font-medium"
+                     >
+                        Edit it instead
+                     </Link>
+                  </div>
+               )}
+               <Button
+                  type="submit"
+                  className="w-full h-11 font-semibold"
+                  disabled={isSubmitting || !!existingEntry}
+               >
+                  {isSubmitting ? "Saving..." : "Save Entry"}
+               </Button>
+            </div>
+         </form>
       </div>
 
-      <Dialog open={suggestions.length > 0} onOpenChange={(open: boolean) => { if (!open) setSuggestions([]); }}>
+      <Dialog
+         open={suggestions.length > 0}
+         onOpenChange={(open: boolean) => {
+            if (!open) setSuggestions([]);
+         }}
+      >
          <DialogContent>
             <DialogHeader>
                <DialogTitle>Medication reminder</DialogTitle>
