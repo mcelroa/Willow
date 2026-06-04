@@ -9,7 +9,6 @@ import {
    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -70,12 +69,14 @@ function MedicationFormFields({
    onCancel,
    isPending,
    submitLabel,
+   title,
 }: {
    form: ReturnType<typeof useForm<MedicationForm>>;
    onSubmit: (data: MedicationForm) => void;
    onCancel: () => void;
    isPending: boolean;
    submitLabel: string;
+   title: string;
 }) {
    const {
       register,
@@ -121,169 +122,188 @@ function MedicationFormFields({
       );
 
    return (
-      <form noValidate onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-         <div className="grid sm:grid-cols-2 gap-4">
-            <div className="flex flex-col gap-1.5">
-               <Label htmlFor="name">Medication name</Label>
-               <Input id="name" placeholder="e.g. Ondansetron" {...register("name")} />
-               {errors.name && (
-                  <p className="text-sm text-destructive">{errors.name.message}</p>
-               )}
+      <form noValidate onSubmit={handleSubmit(onSubmit)}>
+         <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+            <div className="px-5 py-3.5">
+               <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                  {title}
+               </p>
             </div>
 
-            <div className="flex flex-col gap-1.5">
-               <Label htmlFor="dosage">Dosage (optional)</Label>
-               <Input id="dosage" placeholder="e.g. 8mg" {...register("dosage")} />
-            </div>
-         </div>
-
-         <div className="flex flex-col gap-1.5">
-            <Label>Targets symptom (optional)</Label>
-            <Controller
-               control={control}
-               name="targetSymptom"
-               render={({ field }) => (
-                  <Select
-                     value={field.value ?? ""}
-                     onValueChange={(v: string) => field.onChange(v === "none" ? "" : v)}
-                  >
-                     <SelectTrigger className="w-full sm:w-48">
-                        <SelectValue placeholder="None" />
-                     </SelectTrigger>
-                     <SelectContent>
-                        <SelectItem value="none">None</SelectItem>
-                        {SYMPTOM_OPTIONS.map((o) => (
-                           <SelectItem key={o.value} value={o.value}>
-                              {o.label}
-                           </SelectItem>
-                        ))}
-                     </SelectContent>
-                  </Select>
-               )}
-            />
-            <p className="text-xs text-muted-foreground">
-               If set, you'll be reminded about this medication after logging a high symptom score.
-            </p>
-         </div>
-
-         <div className="flex flex-col gap-3">
-            <Label>Schedule</Label>
-
-            <div className="rounded-md border p-3 flex flex-col gap-3">
+            <div className="px-5 py-5 grid sm:grid-cols-2 gap-4">
                <div className="flex flex-col gap-1.5">
-                  <p className="text-xs font-medium text-muted-foreground">Days</p>
-                  <div className="flex flex-wrap gap-1.5">
-                     {DAY_LABELS.map((label, i) => (
-                        <button
-                           key={i}
-                           type="button"
-                           onClick={() => toggleDay(i)}
-                           className={cn(
-                              "h-7 px-2.5 rounded text-xs font-medium transition-colors",
-                              bulkDays.includes(i)
-                                 ? "bg-primary text-primary-foreground"
-                                 : "bg-muted text-muted-foreground hover:bg-muted/70"
-                           )}
-                        >
-                           {label}
-                        </button>
-                     ))}
-                  </div>
-               </div>
-
-               <div className="flex flex-col gap-1.5">
-                  <p className="text-xs font-medium text-muted-foreground">Times</p>
-                  <div className="flex items-center gap-2">
-                     <Input
-                        type="time"
-                        className="w-32 h-8 text-sm"
-                        value={bulkTimeInput}
-                        onChange={(e) => setBulkTimeInput(e.target.value)}
-                        onKeyDown={(e) => {
-                           if (e.key === "Enter") {
-                              e.preventDefault();
-                              addBulkTime();
-                           }
-                        }}
-                     />
-                     <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-1"
-                        onClick={addBulkTime}
-                     >
-                        <Plus className="h-3 w-3" />
-                        Add
-                     </Button>
-                  </div>
-                  {bulkTimes.length > 0 && (
-                     <div className="flex flex-wrap gap-1.5">
-                        {bulkTimes.map((time) => (
-                           <span
-                              key={time}
-                              className="inline-flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded"
-                           >
-                              {time}
-                              <button
-                                 type="button"
-                                 onClick={() =>
-                                    setBulkTimes((prev) => prev.filter((t) => t !== time))
-                                 }
-                                 className="text-muted-foreground hover:text-foreground"
-                              >
-                                 <X className="h-3 w-3" />
-                              </button>
-                           </span>
-                        ))}
-                     </div>
+                  <Label htmlFor="name" className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                     Medication name
+                  </Label>
+                  <Input id="name" placeholder="e.g. Ondansetron" {...register("name")} />
+                  {errors.name && (
+                     <p className="text-sm text-destructive">{errors.name.message}</p>
                   )}
                </div>
-
-               <Button
-                  type="button"
-                  size="sm"
-                  variant="secondary"
-                  className="self-start"
-                  disabled={bulkDays.length === 0 || bulkTimes.length === 0}
-                  onClick={addToSchedule}
-               >
-                  Add to schedule
-               </Button>
+               <div className="flex flex-col gap-1.5">
+                  <Label htmlFor="dosage" className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                     Dosage{" "}
+                     <span className="normal-case font-normal tracking-normal">(optional)</span>
+                  </Label>
+                  <Input id="dosage" placeholder="e.g. 8mg" {...register("dosage")} />
+               </div>
             </div>
 
-            {sortedFields.length > 0 ? (
-               <div className="flex flex-wrap gap-1.5">
-                  {sortedFields.map(({ field, index }) => (
-                     <span
-                        key={field.id}
-                        className="inline-flex items-center gap-1 text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded"
-                     >
-                        {DAY_LABELS[field.dayOfWeek]} {field.time}
-                        <button
-                           type="button"
-                           onClick={() => remove(index)}
-                           className="text-muted-foreground hover:text-destructive"
+            <div className="px-5 py-5 flex flex-col gap-3">
+               <div>
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                     Targets symptom{" "}
+                     <span className="normal-case font-normal tracking-normal">(optional)</span>
+                  </p>
+                  <Controller
+                     control={control}
+                     name="targetSymptom"
+                     render={({ field }) => (
+                        <Select
+                           value={field.value ?? ""}
+                           onValueChange={(v: string) => field.onChange(v === "none" ? "" : v)}
                         >
-                           <X className="h-3 w-3" />
-                        </button>
-                     </span>
-                  ))}
+                           <SelectTrigger className="w-full sm:w-48">
+                              <SelectValue placeholder="None" />
+                           </SelectTrigger>
+                           <SelectContent>
+                              <SelectItem value="none">None</SelectItem>
+                              {SYMPTOM_OPTIONS.map((o) => (
+                                 <SelectItem key={o.value} value={o.value}>
+                                    {o.label}
+                                 </SelectItem>
+                              ))}
+                           </SelectContent>
+                        </Select>
+                     )}
+                  />
+                  <p className="text-xs text-muted-foreground mt-2">
+                     If set, you'll be reminded about this medication after logging a high symptom score.
+                  </p>
                </div>
-            ) : (
-               <p className="text-sm text-muted-foreground">
-                  No schedule set. Select days and times above to add reminders.
-               </p>
-            )}
-         </div>
+            </div>
 
-         <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
-               Cancel
-            </Button>
-            <Button type="submit" disabled={isPending}>
-               {isPending ? "Saving..." : submitLabel}
-            </Button>
+            <div className="px-5 py-5 flex flex-col gap-3">
+               <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                  Schedule
+               </p>
+
+               <div className="rounded-xl border bg-muted/30 p-3 flex flex-col gap-3">
+                  <div className="flex flex-col gap-1.5">
+                     <p className="text-xs font-medium text-muted-foreground">Days</p>
+                     <div className="flex flex-wrap gap-1.5">
+                        {DAY_LABELS.map((label, i) => (
+                           <button
+                              key={i}
+                              type="button"
+                              onClick={() => toggleDay(i)}
+                              className={cn(
+                                 "h-7 px-2.5 rounded text-xs font-medium transition-colors",
+                                 bulkDays.includes(i)
+                                    ? "bg-primary text-primary-foreground"
+                                    : "bg-background text-muted-foreground border hover:bg-muted"
+                              )}
+                           >
+                              {label}
+                           </button>
+                        ))}
+                     </div>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                     <p className="text-xs font-medium text-muted-foreground">Times</p>
+                     <div className="flex items-center gap-2">
+                        <Input
+                           type="time"
+                           className="w-32 h-8 text-sm"
+                           value={bulkTimeInput}
+                           onChange={(e) => setBulkTimeInput(e.target.value)}
+                           onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                 e.preventDefault();
+                                 addBulkTime();
+                              }
+                           }}
+                        />
+                        <Button
+                           type="button"
+                           variant="outline"
+                           size="sm"
+                           className="h-8 gap-1"
+                           onClick={addBulkTime}
+                        >
+                           <Plus className="h-3 w-3" />
+                           Add
+                        </Button>
+                     </div>
+                     {bulkTimes.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5">
+                           {bulkTimes.map((time) => (
+                              <span
+                                 key={time}
+                                 className="inline-flex items-center gap-1 text-xs bg-background border px-2 py-1 rounded"
+                              >
+                                 {time}
+                                 <button
+                                    type="button"
+                                    onClick={() =>
+                                       setBulkTimes((prev) => prev.filter((t) => t !== time))
+                                    }
+                                    className="text-muted-foreground hover:text-foreground"
+                                 >
+                                    <X className="h-3 w-3" />
+                                 </button>
+                              </span>
+                           ))}
+                        </div>
+                     )}
+                  </div>
+
+                  <Button
+                     type="button"
+                     size="sm"
+                     variant="secondary"
+                     className="self-start"
+                     disabled={bulkDays.length === 0 || bulkTimes.length === 0}
+                     onClick={addToSchedule}
+                  >
+                     Add to schedule
+                  </Button>
+               </div>
+
+               {sortedFields.length > 0 ? (
+                  <div className="flex flex-wrap gap-1.5">
+                     {sortedFields.map(({ field, index }) => (
+                        <span
+                           key={field.id}
+                           className="inline-flex items-center gap-1 text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded"
+                        >
+                           {DAY_LABELS[field.dayOfWeek]} {field.time}
+                           <button
+                              type="button"
+                              onClick={() => remove(index)}
+                              className="text-muted-foreground hover:text-destructive"
+                           >
+                              <X className="h-3 w-3" />
+                           </button>
+                        </span>
+                     ))}
+                  </div>
+               ) : (
+                  <p className="text-sm text-muted-foreground">
+                     No schedule set. Select days and times above to add reminders.
+                  </p>
+               )}
+            </div>
+
+            <div className="px-5 py-3.5 flex justify-end gap-2">
+               <Button type="button" variant="outline" onClick={onCancel}>
+                  Cancel
+               </Button>
+               <Button type="submit" disabled={isPending}>
+                  {isPending ? "Saving..." : submitLabel}
+               </Button>
+            </div>
          </div>
       </form>
    );
@@ -361,7 +381,7 @@ export default function Medications() {
    };
 
    const formatSchedule = (med: Medication) => {
-      if (med.schedules.length === 0) return "No schedule";
+      if (med.schedules.length === 0) return "No schedule set";
       const grouped = med.schedules.reduce<Record<string, string[]>>((acc, s) => {
          const day = DAY_LABELS[s.dayOfWeek];
          if (!acc[day]) acc[day] = [];
@@ -392,7 +412,7 @@ export default function Medications() {
    return (
       <>
          <TourGuide pageName="medications" steps={tourSteps} />
-         <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
+         <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col gap-5">
             <PageHeader
                title="Medications"
                description="Log your prescribed medications and set daily reminders."
@@ -412,23 +432,19 @@ export default function Medications() {
             />
 
             {showAddForm && (
-               <Card id="medications-add">
-                  <CardHeader>
-                     <CardTitle className="text-base">Add medication</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                     <MedicationFormFields
-                        form={addForm}
-                        onSubmit={handleAdd}
-                        onCancel={() => {
-                           addForm.reset(defaultValues);
-                           setShowAddForm(false);
-                        }}
-                        isPending={createMedication.isPending}
-                        submitLabel="Add medication"
-                     />
-                  </CardContent>
-               </Card>
+               <div id="medications-add">
+                  <MedicationFormFields
+                     form={addForm}
+                     onSubmit={handleAdd}
+                     onCancel={() => {
+                        addForm.reset(defaultValues);
+                        setShowAddForm(false);
+                     }}
+                     isPending={createMedication.isPending}
+                     submitLabel="Add medication"
+                     title="Add medication"
+                  />
+               </div>
             )}
 
             {isLoading ? (
@@ -443,51 +459,41 @@ export default function Medications() {
                <div className="flex flex-col gap-3">
                   {medications.map((med) =>
                      editingId === med.id ? (
-                        <Card key={med.id}>
-                           <CardHeader>
-                              <CardTitle className="text-base">Edit medication</CardTitle>
-                           </CardHeader>
-                           <CardContent>
-                              <MedicationFormFields
-                                 form={editForm}
-                                 onSubmit={handleEdit}
-                                 onCancel={() => setEditingId(null)}
-                                 isPending={updateMedication.isPending}
-                                 submitLabel="Save changes"
-                              />
-                           </CardContent>
-                        </Card>
+                        <MedicationFormFields
+                           key={med.id}
+                           form={editForm}
+                           onSubmit={handleEdit}
+                           onCancel={() => setEditingId(null)}
+                           isPending={updateMedication.isPending}
+                           submitLabel="Save changes"
+                           title="Edit medication"
+                        />
                      ) : (
-                        <Card key={med.id} className={med.isActive ? "" : "opacity-60"}>
-                           <CardContent className="flex flex-col sm:flex-row sm:items-start gap-3 justify-between">
-                              <div className="flex flex-col gap-0.5">
-                                 <div className="flex items-center gap-2">
-                                    <p className="font-medium text-sm">{med.name}</p>
+                        <div
+                           key={med.id}
+                           className={cn(
+                              "rounded-2xl border bg-card overflow-hidden",
+                              !med.isActive && "opacity-60"
+                           )}
+                        >
+                           <div className="border-b px-5 py-3.5 flex items-start justify-between gap-3">
+                              <div>
+                                 <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                                    {med.isActive ? "Active" : "Inactive"}
+                                    {med.targetSymptom && ` · Targets ${med.targetSymptom}`}
+                                 </p>
+                                 <div className="flex items-baseline gap-2 mt-0.5">
+                                    <p className="font-semibold text-sm">{med.name}</p>
                                     {med.dosage && (
-                                       <span className="text-xs text-muted-foreground">
-                                          {med.dosage}
-                                       </span>
-                                    )}
-                                    {!med.isActive && (
-                                       <span className="text-xs bg-muted text-muted-foreground px-1.5 py-0.5 rounded">
-                                          Inactive
-                                       </span>
+                                       <span className="text-xs text-muted-foreground">{med.dosage}</span>
                                     )}
                                  </div>
-                                 {med.targetSymptom && (
-                                    <p className="text-xs text-muted-foreground capitalize">
-                                       Targets {med.targetSymptom}
-                                    </p>
-                                 )}
-                                 <p className="text-xs text-muted-foreground">
-                                    {formatSchedule(med)}
-                                 </p>
                               </div>
-                              <div className="flex gap-2 shrink-0">
+                              <div className="flex gap-1.5 shrink-0">
                                  <Button
-                                    variant="outline"
+                                    variant="ghost"
                                     size="sm"
-                                    className="gap-1.5"
+                                    className="h-7 px-2 gap-1"
                                     onClick={() => startEdit(med)}
                                  >
                                     <Pencil className="h-3.5 w-3.5" />
@@ -496,15 +502,18 @@ export default function Medications() {
                                  <Button
                                     variant="ghost"
                                     size="sm"
-                                    className="text-destructive hover:text-destructive gap-1.5"
+                                    className="h-7 px-2 text-destructive hover:text-destructive gap-1"
                                     onClick={() => setDeleteTargetId(med.id)}
                                  >
                                     <Trash2 className="h-3.5 w-3.5" />
                                     Delete
                                  </Button>
                               </div>
-                           </CardContent>
-                        </Card>
+                           </div>
+                           <div className="px-5 py-3.5">
+                              <p className="text-xs text-muted-foreground">{formatSchedule(med)}</p>
+                           </div>
+                        </div>
                      )
                   )}
                </div>
@@ -521,8 +530,7 @@ export default function Medications() {
                <AlertDialogHeader>
                   <AlertDialogTitle>Delete this medication?</AlertDialogTitle>
                   <AlertDialogDescription>
-                     This will remove the medication and all its scheduled reminders. This cannot
-                     be undone.
+                     This will remove the medication and all its scheduled reminders. This cannot be undone.
                   </AlertDialogDescription>
                </AlertDialogHeader>
                <AlertDialogFooter>

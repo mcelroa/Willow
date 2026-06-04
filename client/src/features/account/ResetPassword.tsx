@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { WillowMark } from "@/components/WillowMark";
 import agent from "@/lib/api/agent";
 import {
    resetPasswordSchema,
@@ -43,14 +43,22 @@ export default function ResetPassword() {
 
    if (!email || !token) {
       return (
-         <div className="flex items-center justify-center min-h-screen">
-            <div className="w-full max-w-sm p-6 border rounded-lg text-center">
-               <p className="text-sm text-muted-foreground">
-                  Invalid reset link.{" "}
-                  <Link to="/forgot-password" className="underline underline-offset-4">
-                     Request a new one
-                  </Link>
-               </p>
+         <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+            <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
+               <WillowMark size={44} className="text-foreground" />
+               <div className="rounded-2xl border bg-card overflow-hidden w-full">
+                  <div className="px-6 py-8 flex flex-col gap-3">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Error</p>
+                     <h1 className="text-xl font-bold tracking-tight">Invalid link</h1>
+                     <p className="text-sm text-muted-foreground">
+                        This reset link is missing required information.{" "}
+                        <Link to="/forgot-password" className="underline underline-offset-4">
+                           Request a new one
+                        </Link>
+                        .
+                     </p>
+                  </div>
+               </div>
             </div>
          </div>
       );
@@ -58,15 +66,21 @@ export default function ResetPassword() {
 
    if (success) {
       return (
-         <div className="flex items-center justify-center min-h-screen">
-            <div className="w-full max-w-sm p-6 border rounded-lg text-center flex flex-col gap-4">
-               <h1 className="text-xl font-semibold">Password reset</h1>
-               <p className="text-sm text-muted-foreground">
-                  Your password has been updated.
-               </p>
+         <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+            <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
+               <WillowMark size={44} className="text-foreground" />
+               <div className="rounded-2xl border bg-card overflow-hidden w-full">
+                  <div className="px-6 py-8 flex flex-col gap-3">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Done</p>
+                     <h1 className="text-xl font-bold tracking-tight">Password updated</h1>
+                     <p className="text-sm text-muted-foreground">
+                        Your password has been reset. You can now sign in.
+                     </p>
+                  </div>
+               </div>
                <Link
                   to="/login"
-                  className="text-sm underline underline-offset-4 text-muted-foreground"
+                  className="text-xs font-semibold tracking-widest uppercase text-muted-foreground hover:text-foreground underline underline-offset-4"
                >
                   Sign in
                </Link>
@@ -76,50 +90,51 @@ export default function ResetPassword() {
    }
 
    return (
-      <div className="flex items-center justify-center min-h-screen">
-         <div className="w-full max-w-sm p-6 border rounded-lg">
-            <h1 className="text-xl font-semibold mb-6">Set a new password</h1>
-            <form
-               onSubmit={handleSubmit(onSubmit)}
-               className="flex flex-col gap-4"
-               noValidate
-            >
-               <Field>
-                  <FieldLabel htmlFor="newPassword">New password</FieldLabel>
-                  <Input
-                     id="newPassword"
-                     type="password"
-                     {...register("newPassword")}
-                  />
-                  {errors.newPassword && (
-                     <p className="text-sm text-red-500">
-                        {errors.newPassword.message}
-                     </p>
-                  )}
-               </Field>
-               <Field>
-                  <FieldLabel htmlFor="confirmPassword">
-                     Confirm password
-                  </FieldLabel>
-                  <Input
-                     id="confirmPassword"
-                     type="password"
-                     {...register("confirmPassword")}
-                  />
-                  {errors.confirmPassword && (
-                     <p className="text-sm text-red-500">
-                        {errors.confirmPassword.message}
-                     </p>
-                  )}
-               </Field>
-               <Button type="submit" disabled={isSubmitting}>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+         <div className="w-full max-w-sm flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-3 text-center">
+               <WillowMark size={44} className="text-foreground" />
+               <div>
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Account security</p>
+                  <h1 className="text-xl font-bold tracking-tight mt-0.5">Set a new password</h1>
+               </div>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+               <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+                  <div className="px-6 py-5">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">New password</p>
+                     <Input
+                        id="newPassword"
+                        type="password"
+                        autoComplete="new-password"
+                        {...register("newPassword")}
+                     />
+                     {errors.newPassword && (
+                        <p className="text-sm text-destructive mt-1.5">{errors.newPassword.message}</p>
+                     )}
+                  </div>
+                  <div className="px-6 py-5">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">Confirm password</p>
+                     <Input
+                        id="confirmPassword"
+                        type="password"
+                        autoComplete="new-password"
+                        {...register("confirmPassword")}
+                     />
+                     {errors.confirmPassword && (
+                        <p className="text-sm text-destructive mt-1.5">{errors.confirmPassword.message}</p>
+                     )}
+                  </div>
+               </div>
+
+               {serverError && (
+                  <p className="text-sm text-destructive text-center">{serverError}</p>
+               )}
+
+               <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
                   {isSubmitting ? "Resetting..." : "Reset password"}
                </Button>
-               {serverError && (
-                  <p className="text-sm text-red-500 text-center">
-                     {serverError}
-                  </p>
-               )}
             </form>
          </div>
       </div>

@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/EmptyState";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
@@ -7,23 +6,21 @@ import TourGuide from "@/components/TourGuide";
 import agent from "@/lib/api/agent";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useQuestion } from "@/lib/hooks/useQuestion";
-import { Activity } from "lucide-react";
+import { Activity, FileDown } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
 const metricKeys = ["mood", "pain", "fatigue", "nausea"] as const;
 
 function average(checkIns: CheckIn[], key: (typeof metricKeys)[number]) {
-   if (checkIns.length === 0) return "-";
-   const avg = checkIns.reduce((sum, c) => sum + c[key], 0) / checkIns.length;
-   return avg.toFixed(1);
+   if (checkIns.length === 0) return null;
+   return checkIns.reduce((sum, c) => sum + c[key], 0) / checkIns.length;
 }
 
 function weightAverage(checkIns: CheckIn[]) {
    const withWeight = checkIns.filter((c) => c.weight != null);
    if (withWeight.length === 0) return null;
-   const avg = withWeight.reduce((sum, c) => sum + c.weight!, 0) / withWeight.length;
-   return avg.toFixed(1);
+   return withWeight.reduce((sum, c) => sum + c.weight!, 0) / withWeight.length;
 }
 
 function formatDate(dateStr: string) {
@@ -35,12 +32,12 @@ function formatDate(dateStr: string) {
 }
 
 export default function Summary() {
-   const [isLoading, setIsLoading] = useState(false);
+   const [isExporting, setIsExporting] = useState(false);
    const { checkIns, loadingCheckIns } = useCheckIn();
    const { questions } = useQuestion();
 
    const handleDownload = async () => {
-      setIsLoading(true);
+      setIsExporting(true);
       try {
          const blob = await agent.Export.pdf();
          const url = URL.createObjectURL(blob);
@@ -50,7 +47,7 @@ export default function Summary() {
          a.click();
          URL.revokeObjectURL(url);
       } finally {
-         setIsLoading(false);
+         setIsExporting(false);
       }
    };
 
@@ -76,126 +73,144 @@ export default function Summary() {
 
    return (
       <>
-      <TourGuide pageName="summary" steps={tourSteps} />
-      <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-6">
-         <PageHeader
-            title="Summary"
-            description="All-time overview of your health data"
-            action={
-               <Button id="summary-pdf" onClick={handleDownload} disabled={isLoading}>
-                  {isLoading ? "Generating..." : "Export as PDF"}
-               </Button>
-            }
-         />
-
-         {loadingCheckIns ? (
-            <LoadingSpinner />
-         ) : checkIns.length === 0 ? (
-            <EmptyState
-               icon={Activity}
-               title="No check-ins recorded yet"
-               description="Log your first daily check-in to see your health summary here."
+         <TourGuide pageName="summary" steps={tourSteps} />
+         <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col gap-5">
+            <PageHeader
+               title="Summary"
+               description="All-time overview of your health data"
                action={
-                  <Button asChild size="sm">
-                     <Link to="/checkin">Log today's check-in</Link>
+                  <Button
+                     id="summary-pdf"
+                     onClick={handleDownload}
+                     disabled={isExporting || checkIns.length === 0}
+                     className="gap-1.5"
+                  >
+                     <FileDown className="h-4 w-4" />
+                     {isExporting ? "Generating..." : "Export PDF"}
                   </Button>
                }
             />
-         ) : (
-            <>
-               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  <Card>
-                     <CardHeader className="pb-1">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                           Total check-ins
-                        </CardTitle>
-                     </CardHeader>
-                     <CardContent>
-                        <p className="text-2xl font-bold">{checkIns.length}</p>
-                     </CardContent>
-                  </Card>
-                  <Card>
-                     <CardHeader className="pb-1">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                           First check-in
-                        </CardTitle>
-                     </CardHeader>
-                     <CardContent>
-                        <p className="text-lg font-bold">{formatDate(earliest.date)}</p>
-                     </CardContent>
-                  </Card>
-                  <Card>
-                     <CardHeader className="pb-1">
-                        <CardTitle className="text-sm font-medium text-muted-foreground">
-                           Latest check-in
-                        </CardTitle>
-                     </CardHeader>
-                     <CardContent>
-                        <p className="text-lg font-bold">{formatDate(latest.date)}</p>
-                     </CardContent>
-                  </Card>
-               </div>
 
-               <div>
-                  <h2 className="text-sm font-medium text-muted-foreground mb-3">
-                     All-time averages
-                  </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                     {metricKeys.map((key) => (
-                        <Card key={key}>
-                           <CardHeader className="pb-1">
-                              <CardTitle className="text-sm font-medium text-muted-foreground capitalize">
-                                 {key}
-                              </CardTitle>
-                           </CardHeader>
-                           <CardContent>
-                              <p className="text-2xl font-bold">{average(checkIns, key)}</p>
-                              <p className="text-xs text-muted-foreground">avg / 10</p>
-                           </CardContent>
-                        </Card>
-                     ))}
-                     {avgWeight != null && (
-                        <Card>
-                           <CardHeader className="pb-1">
-                              <CardTitle className="text-sm font-medium text-muted-foreground">
-                                 Weight
-                              </CardTitle>
-                           </CardHeader>
-                           <CardContent>
-                              <p className="text-2xl font-bold">{avgWeight}</p>
-                              <p className="text-xs text-muted-foreground">avg kg</p>
-                           </CardContent>
-                        </Card>
-                     )}
+            {loadingCheckIns ? (
+               <LoadingSpinner />
+            ) : checkIns.length === 0 ? (
+               <EmptyState
+                  icon={Activity}
+                  title="No check-ins recorded yet"
+                  description="Log your first daily check-in to see your health summary here."
+                  action={
+                     <Button asChild size="sm">
+                        <Link to="/checkin">Log today's check-in</Link>
+                     </Button>
+                  }
+               />
+            ) : (
+               <>
+                  {/* Overview stats */}
+                  <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+                     <div className="px-5 py-3.5">
+                        <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                           Overview
+                        </p>
+                     </div>
+                     <div className="grid grid-cols-3 divide-x">
+                        <div className="px-5 py-5 flex flex-col gap-1">
+                           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                              Total
+                           </p>
+                           <p className="text-3xl font-bold tabular-nums">{checkIns.length}</p>
+                           <p className="text-xs text-muted-foreground">check-ins</p>
+                        </div>
+                        <div className="px-5 py-5 flex flex-col gap-1">
+                           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                              First
+                           </p>
+                           <p className="text-lg font-bold leading-tight">{formatDate(earliest.date)}</p>
+                        </div>
+                        <div className="px-5 py-5 flex flex-col gap-1">
+                           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                              Latest
+                           </p>
+                           <p className="text-lg font-bold leading-tight">{formatDate(latest.date)}</p>
+                        </div>
+                     </div>
                   </div>
-               </div>
 
-               <Card>
-                  <CardHeader className="pb-1">
-                     <CardTitle className="text-sm font-medium text-muted-foreground">
-                        Pending questions ({pendingQuestions.length})
-                     </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                     {pendingQuestions.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No pending questions.</p>
-                     ) : (
-                        <ul className="flex flex-col gap-2">
-                           {pendingQuestions.map((q, i) => (
-                              <li key={q.id} className="flex items-start gap-3 rounded-md bg-muted px-3 py-2">
-                                 <span className="text-xs font-medium text-muted-foreground mt-0.5 w-4 shrink-0">
-                                    {i + 1}.
+                  {/* All-time averages */}
+                  <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+                     <div className="px-5 py-3.5">
+                        <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                           All-time averages
+                        </p>
+                     </div>
+                     <div className="px-5 py-5">
+                        <div className="grid grid-cols-4 gap-4">
+                           {metricKeys.map((key) => {
+                              const avg = average(checkIns, key);
+                              return (
+                                 <div key={key} className="flex flex-col items-center gap-1.5 text-center">
+                                    <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                                       {key}
+                                    </p>
+                                    <p className="text-2xl font-bold tabular-nums">
+                                       {avg !== null ? avg.toFixed(1) : "–"}
+                                    </p>
+                                    <div className="w-full h-1 rounded-full bg-border">
+                                       <div
+                                          className="h-1 rounded-full bg-primary/50"
+                                          style={{ width: avg !== null ? `${(avg / 10) * 100}%` : "0%" }}
+                                       />
+                                    </div>
+                                 </div>
+                              );
+                           })}
+                        </div>
+                        {avgWeight !== null && (
+                           <div className="mt-5 pt-4 border-t flex items-center justify-between">
+                              <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                                 Weight
+                              </p>
+                              <div className="flex items-baseline gap-1.5">
+                                 <span className="text-2xl font-bold tabular-nums">
+                                    {avgWeight.toFixed(1)}
                                  </span>
-                                 <span className="text-sm">{q.text}</span>
-                              </li>
-                           ))}
-                        </ul>
-                     )}
-                  </CardContent>
-               </Card>
-            </>
-         )}
-      </div>
+                                 <span className="text-sm text-muted-foreground">avg kg</span>
+                              </div>
+                           </div>
+                        )}
+                     </div>
+                  </div>
+
+                  {/* Pending questions */}
+                  <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+                     <div className="px-5 py-3.5 flex items-center justify-between">
+                        <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                           Questions for care team
+                        </p>
+                        <span className="text-xs text-muted-foreground tabular-nums">
+                           {pendingQuestions.length} pending
+                        </span>
+                     </div>
+                     <div className="px-5 py-4">
+                        {pendingQuestions.length === 0 ? (
+                           <p className="text-sm text-muted-foreground">No pending questions.</p>
+                        ) : (
+                           <ul className="flex flex-col gap-2.5">
+                              {pendingQuestions.map((q, i) => (
+                                 <li key={q.id} className="flex items-start gap-3">
+                                    <span className="text-xs font-medium text-muted-foreground tabular-nums mt-0.5 w-4 shrink-0">
+                                       {i + 1}.
+                                    </span>
+                                    <span className="text-sm leading-relaxed">{q.text}</span>
+                                 </li>
+                              ))}
+                           </ul>
+                        )}
+                     </div>
+                  </div>
+               </>
+            )}
+         </div>
       </>
    );
 }

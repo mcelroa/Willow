@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PageHeader } from "@/components/PageHeader";
 import agent from "@/lib/api/agent";
 import {
    changePasswordSchema,
@@ -39,71 +39,76 @@ export default function ChangePassword() {
    };
 
    return (
-      <div className="max-w-md mx-auto px-4 py-8">
-         <h1 className="text-xl font-semibold mb-6">Change password</h1>
-         {success && (
-            <p className="text-sm text-green-600 mb-4">
-               Password updated successfully.
-            </p>
-         )}
-         <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex flex-col gap-4"
-            noValidate
-         >
-            <Field>
-               <FieldLabel htmlFor="currentPassword">Current password</FieldLabel>
-               <Input
-                  id="currentPassword"
-                  type="password"
-                  {...register("currentPassword")}
-               />
-               {errors.currentPassword && (
-                  <p className="text-sm text-red-500">
-                     {errors.currentPassword.message}
+      <div className="max-w-xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col gap-5">
+         <PageHeader title="Change password" description="Update your account password" />
+
+         <form onSubmit={handleSubmit(onSubmit)} noValidate>
+            <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+               <div className="px-6 py-5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                     Current password
                   </p>
-               )}
-            </Field>
-            <Field>
-               <FieldLabel htmlFor="newPassword">New password</FieldLabel>
-               <Input
-                  id="newPassword"
-                  type="password"
-                  {...register("newPassword")}
-               />
-               {errors.newPassword && (
-                  <p className="text-sm text-red-500">
-                     {errors.newPassword.message}
+                  <Input
+                     id="currentPassword"
+                     type="password"
+                     autoComplete="current-password"
+                     {...register("currentPassword")}
+                  />
+                  {errors.currentPassword && (
+                     <p className="text-sm text-destructive mt-1.5">{errors.currentPassword.message}</p>
+                  )}
+               </div>
+               <div className="px-6 py-5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                     New password
                   </p>
-               )}
-            </Field>
-            <Field>
-               <FieldLabel htmlFor="confirmPassword">Confirm new password</FieldLabel>
-               <Input
-                  id="confirmPassword"
-                  type="password"
-                  {...register("confirmPassword")}
-               />
-               {errors.confirmPassword && (
-                  <p className="text-sm text-red-500">
-                     {errors.confirmPassword.message}
+                  <Input
+                     id="newPassword"
+                     type="password"
+                     autoComplete="new-password"
+                     {...register("newPassword")}
+                  />
+                  {errors.newPassword && (
+                     <p className="text-sm text-destructive mt-1.5">{errors.newPassword.message}</p>
+                  )}
+               </div>
+               <div className="px-6 py-5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                     Confirm new password
                   </p>
-               )}
-            </Field>
-            <div className="flex items-center justify-between pt-1">
+                  <Input
+                     id="confirmPassword"
+                     type="password"
+                     autoComplete="new-password"
+                     {...register("confirmPassword")}
+                  />
+                  {errors.confirmPassword && (
+                     <p className="text-sm text-destructive mt-1.5">{errors.confirmPassword.message}</p>
+                  )}
+               </div>
+            </div>
+
+            {success && (
+               <div className="mt-4 rounded-xl bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800 px-4 py-3 text-sm text-green-800 dark:text-green-400 text-center">
+                  Password updated successfully.
+               </div>
+            )}
+
+            {serverError && (
+               <p className="mt-4 text-sm text-destructive text-center">{serverError}</p>
+            )}
+
+            <div className="mt-4 flex items-center justify-between">
                <Link
                   to="/"
-                  className="text-sm text-muted-foreground underline underline-offset-4"
+                  className="text-xs font-semibold tracking-widest uppercase text-muted-foreground hover:text-foreground"
                >
                   Cancel
                </Link>
-               <Button type="submit" disabled={isSubmitting}>
+               <Button type="submit" className="h-11 px-6 font-semibold" disabled={isSubmitting}>
                   {isSubmitting ? "Saving..." : "Update password"}
                </Button>
             </div>
-            {serverError && (
-               <p className="text-sm text-red-500 text-center">{serverError}</p>
-            )}
          </form>
       </div>
    );

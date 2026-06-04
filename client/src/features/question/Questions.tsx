@@ -10,7 +10,6 @@ import {
    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import TourGuide from "@/components/TourGuide";
@@ -79,127 +78,125 @@ export default function Questions() {
 
    return (
       <>
-      <TourGuide pageName="questions" steps={tourSteps} />
-      <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-6 flex flex-col gap-4">
-         <PageHeader title="Questions" description="Questions to ask your care team" />
+         <TourGuide pageName="questions" steps={tourSteps} />
+         <div className="max-w-2xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col gap-5">
+            <PageHeader title="Questions" description="Questions to ask your care team" />
 
-         <Tabs id="questions-tabs" defaultValue="pending">
-            <TabsList>
-               <TabsTrigger value="pending">
-                  Pending ({pending.length})
-               </TabsTrigger>
-               <TabsTrigger value="asked">Asked ({asked.length})</TabsTrigger>
-            </TabsList>
+            <Tabs id="questions-tabs" defaultValue="pending">
+               <TabsList>
+                  <TabsTrigger value="pending">Pending ({pending.length})</TabsTrigger>
+                  <TabsTrigger value="asked">Asked ({asked.length})</TabsTrigger>
+               </TabsList>
 
-            <TabsContent value="pending" className="flex flex-col gap-4 mt-4">
-               <form id="questions-form" onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
-                  <div className="flex-1">
-                     <Input
-                        {...register("text")}
-                        placeholder="Type a question to ask your care team..."
-                     />
-                     {errors.text && (
-                        <p className="text-sm text-destructive mt-1">
-                           {errors.text.message}
+               <TabsContent value="pending" className="flex flex-col gap-4 mt-5">
+                  <div id="questions-form" className="rounded-2xl border bg-card overflow-hidden">
+                     <div className="px-5 py-4">
+                        <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                           New question
                         </p>
-                     )}
-                  </div>
-                  <Button type="submit" disabled={createQuestion.isPending}>
-                     Add
-                  </Button>
-               </form>
-
-               {pending.length === 0 && (
-                  <EmptyState
-                     icon={MessageCircle}
-                     title="No pending questions"
-                     description="Type a question above to add it to your list."
-                  />
-               )}
-               {pending.map((q) => (
-                  <Card key={q.id}>
-                     <CardContent className="pt-4 flex flex-col sm:flex-row sm:items-center gap-3">
-                        <p className="text-sm flex-1">{q.text}</p>
-                        <div className="flex gap-2 shrink-0 self-end sm:self-auto">
-                           <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() =>
-                                 markAsked.mutate(q.id, {
-                                    onSuccess: () =>
-                                       toast.success("Marked as asked."),
-                                    onError: () =>
-                                       toast.error("Something went wrong."),
-                                 })
-                              }
-                              disabled={markAsked.isPending}
-                           >
-                              Mark as asked
+                        <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2" noValidate>
+                           <div className="flex-1">
+                              <Input
+                                 {...register("text")}
+                                 placeholder="What would you like to ask your care team?"
+                              />
+                              {errors.text && (
+                                 <p className="text-sm text-destructive mt-1.5">
+                                    {errors.text.message}
+                                 </p>
+                              )}
+                           </div>
+                           <Button type="submit" disabled={createQuestion.isPending}>
+                              Add
                            </Button>
-                           <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                 <Button variant="ghost" size="sm">
-                                    Delete
-                                 </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                 <AlertDialogHeader>
-                                    <AlertDialogTitle>
-                                       Delete this question?
-                                    </AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                       This action cannot be undone.
-                                    </AlertDialogDescription>
-                                 </AlertDialogHeader>
-                                 <AlertDialogFooter>
-                                    <AlertDialogCancel>
-                                       Cancel
-                                    </AlertDialogCancel>
-                                    <AlertDialogAction
-                                       onClick={() =>
-                                          deleteQuestion.mutate(q.id, {
-                                             onSuccess: () =>
-                                                toast.success(
-                                                   "Question deleted.",
-                                                ),
-                                             onError: () =>
-                                                toast.error(
-                                                   "Something went wrong.",
-                                                ),
-                                          })
-                                       }
-                                    >
-                                       Delete
-                                    </AlertDialogAction>
-                                 </AlertDialogFooter>
-                              </AlertDialogContent>
-                           </AlertDialog>
-                        </div>
-                     </CardContent>
-                  </Card>
-               ))}
-            </TabsContent>
+                        </form>
+                     </div>
+                  </div>
 
-            <TabsContent value="asked" className="flex flex-col gap-3 mt-4">
-               {asked.length === 0 && (
-                  <EmptyState
-                     icon={CheckCircle2}
-                     title="No asked questions yet"
-                     description="Questions you mark as asked at your appointment will appear here."
-                  />
-               )}
-               {asked.map((q) => (
-                  <Card key={q.id}>
-                     <CardContent className="pt-4">
-                        <p className="text-sm text-muted-foreground line-through">
-                           {q.text}
-                        </p>
-                     </CardContent>
-                  </Card>
-               ))}
-            </TabsContent>
-         </Tabs>
-      </div>
+                  {pending.length === 0 && (
+                     <EmptyState
+                        icon={MessageCircle}
+                        title="No pending questions"
+                        description="Type a question above to add it to your list."
+                     />
+                  )}
+
+                  <div className="flex flex-col gap-3">
+                     {pending.map((q) => (
+                        <div key={q.id} className="rounded-2xl border bg-card overflow-hidden">
+                           <div className="px-5 py-4">
+                              <p className="text-sm leading-relaxed">{q.text}</p>
+                           </div>
+                           <div className="border-t px-5 py-3 flex justify-end gap-2">
+                              <Button
+                                 variant="outline"
+                                 size="sm"
+                                 className="gap-1.5"
+                                 onClick={() =>
+                                    markAsked.mutate(q.id, {
+                                       onSuccess: () => toast.success("Marked as asked."),
+                                       onError: () => toast.error("Something went wrong."),
+                                    })
+                                 }
+                                 disabled={markAsked.isPending}
+                              >
+                                 <CheckCircle2 className="h-3.5 w-3.5" />
+                                 Mark as asked
+                              </Button>
+                              <AlertDialog>
+                                 <AlertDialogTrigger asChild>
+                                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive">
+                                       Delete
+                                    </Button>
+                                 </AlertDialogTrigger>
+                                 <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                       <AlertDialogTitle>Delete this question?</AlertDialogTitle>
+                                       <AlertDialogDescription>
+                                          This action cannot be undone.
+                                       </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                       <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                       <AlertDialogAction
+                                          onClick={() =>
+                                             deleteQuestion.mutate(q.id, {
+                                                onSuccess: () => toast.success("Question deleted."),
+                                                onError: () => toast.error("Something went wrong."),
+                                             })
+                                          }
+                                       >
+                                          Delete
+                                       </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                 </AlertDialogContent>
+                              </AlertDialog>
+                           </div>
+                        </div>
+                     ))}
+                  </div>
+               </TabsContent>
+
+               <TabsContent value="asked" className="flex flex-col gap-3 mt-5">
+                  {asked.length === 0 && (
+                     <EmptyState
+                        icon={CheckCircle2}
+                        title="No asked questions yet"
+                        description="Questions you mark as asked at your appointment will appear here."
+                     />
+                  )}
+                  {asked.map((q) => (
+                     <div key={q.id} className="rounded-2xl border bg-card overflow-hidden opacity-60">
+                        <div className="px-5 py-4">
+                           <p className="text-sm text-muted-foreground line-through leading-relaxed">
+                              {q.text}
+                           </p>
+                        </div>
+                     </div>
+                  ))}
+               </TabsContent>
+            </Tabs>
+         </div>
       </>
    );
 }

@@ -1,7 +1,6 @@
 import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useAccount } from "@/lib/hooks/useAccount";
 
@@ -24,57 +23,64 @@ export default function AccountSettings() {
 
    return (
       <>
-      <TourGuide pageName="account-settings" steps={tourSteps} />
-      <div className="max-w-md mx-auto px-4 py-6 flex flex-col gap-6">
-         <PageHeader title="Account settings" description="Manage your notification preferences" />
+         <TourGuide pageName="account-settings" steps={tourSteps} />
+         <div className="max-w-xl mx-auto w-full px-4 sm:px-6 py-8 flex flex-col gap-5">
+            <PageHeader title="Account settings" description="Manage your notification preferences" />
 
-         <div className="flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1">
-               <Label htmlFor="reminder-toggle" className="text-base">
-                  Daily check-in reminder
-               </Label>
-               <p className="text-sm text-muted-foreground">
-                  Receive an email if you haven't checked in by 6 PM UTC.
-               </p>
+            <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+               <div className="px-5 py-3.5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                     Notifications
+                  </p>
+               </div>
+               <div className="px-5 py-4 flex items-center justify-between gap-4" id="reminder-toggle">
+                  <div className="flex flex-col gap-1">
+                     <p className="text-sm font-medium">Daily check-in reminder</p>
+                     <p className="text-xs text-muted-foreground">
+                        Receive an email if you haven't checked in by 6 PM UTC.
+                     </p>
+                  </div>
+                  <Switch
+                     checked={currentUser?.reminderEnabled ?? false}
+                     onCheckedChange={(checked) =>
+                        updateSettings.mutate({ reminderEnabled: checked })
+                     }
+                     disabled={updateSettings.isPending}
+                  />
+               </div>
+               {updateSettings.isError && (
+                  <div className="px-5 py-3.5">
+                     <p className="text-sm text-destructive">Something went wrong. Please try again.</p>
+                  </div>
+               )}
             </div>
-            <Switch
-               id="reminder-toggle"
-               checked={currentUser?.reminderEnabled ?? false}
-               onCheckedChange={(checked) =>
-                  updateSettings.mutate({ reminderEnabled: checked })
-               }
-               disabled={updateSettings.isPending}
-            />
-         </div>
 
-         {updateSettings.isError && (
-            <p className="mt-4 text-sm text-destructive">
-               Something went wrong. Please try again.
-            </p>
-         )}
-
-         <div className="mt-8 pt-6 border-t flex items-center justify-between gap-4">
-            <div className="flex flex-col gap-1">
-               <p className="text-base font-medium">App tour</p>
-               <p className="text-sm text-muted-foreground">
-                  Replay the guided walkthrough on each page.
-               </p>
+            <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+               <div className="px-5 py-3.5">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                     App tour
+                  </p>
+               </div>
+               <div className="px-5 py-4 flex items-center justify-between gap-4">
+                  <p className="text-xs text-muted-foreground">
+                     Replay the guided walkthrough on each page.
+                  </p>
+                  <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => resetTours.mutate()}
+                     disabled={resetTours.isPending}
+                  >
+                     {resetTours.isPending ? "Resetting..." : "Retake tour"}
+                  </Button>
+               </div>
+               {resetTours.isError && (
+                  <div className="px-5 py-3.5">
+                     <p className="text-sm text-destructive">Something went wrong. Please try again.</p>
+                  </div>
+               )}
             </div>
-            <Button
-               variant="outline"
-               onClick={() => resetTours.mutate()}
-               disabled={resetTours.isPending}
-            >
-               {resetTours.isPending ? "Resetting..." : "Retake tour"}
-            </Button>
          </div>
-
-         {resetTours.isError && (
-            <p className="mt-2 text-sm text-destructive">
-               Something went wrong. Please try again.
-            </p>
-         )}
-      </div>
       </>
    );
 }

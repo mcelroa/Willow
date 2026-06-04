@@ -1,11 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { WillowMark } from "@/components/WillowMark";
 import agent from "@/lib/api/agent";
-import {
-   registerSchema,
-   type RegisterSchema,
-} from "@/lib/schemas/registerSchema";
+import { registerSchema, type RegisterSchema } from "@/lib/schemas/registerSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -33,16 +30,21 @@ export default function Register() {
 
    if (submitted) {
       return (
-         <div className="flex items-center justify-center min-h-screen">
-            <div className="w-full max-w-sm p-6 border rounded-lg text-center flex flex-col gap-4">
-               <h1 className="text-xl font-semibold">Check your email</h1>
-               <p className="text-sm text-muted-foreground">
-                  We've sent a verification link to your email address. Click
-                  it to activate your account.
-               </p>
+         <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+            <div className="w-full max-w-sm flex flex-col items-center gap-6 text-center">
+               <WillowMark size={44} className="text-foreground" />
+               <div className="rounded-2xl border bg-card overflow-hidden w-full">
+                  <div className="px-6 py-8 flex flex-col gap-3">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Next step</p>
+                     <h1 className="text-xl font-bold tracking-tight">Check your email</h1>
+                     <p className="text-sm text-muted-foreground">
+                        We've sent a verification link to your email. Click it to activate your account.
+                     </p>
+                  </div>
+               </div>
                <Link
                   to="/login"
-                  className="text-sm underline underline-offset-4 text-muted-foreground"
+                  className="text-xs font-semibold tracking-widest uppercase text-muted-foreground hover:text-foreground underline underline-offset-4"
                >
                   Back to sign in
                </Link>
@@ -52,60 +54,58 @@ export default function Register() {
    }
 
    return (
-      <div className="flex items-center justify-center min-h-screen">
-         <div className="w-full max-w-sm p-6 border rounded-lg">
-            <h1 className="text-xl font-semibold mb-6">Create an account</h1>
-            <form
-               onSubmit={handleSubmit(onSubmit)}
-               className="flex flex-col gap-4"
-               noValidate
-            >
-               <Field>
-                  <FieldLabel htmlFor="username">Username</FieldLabel>
-                  <Input id="username" type="text" {...register("username")} />
-                  {errors.username && (
-                     <p className="text-sm text-red-500">
-                        {errors.username.message}
-                     </p>
-                  )}
-               </Field>
-               <Field>
-                  <FieldLabel htmlFor="email">Email</FieldLabel>
-                  <Input id="email" type="email" {...register("email")} />
-                  {errors.email && (
-                     <p className="text-sm text-red-500">
-                        {errors.email.message}
-                     </p>
-                  )}
-               </Field>
-               <Field>
-                  <FieldLabel htmlFor="password">Password</FieldLabel>
-                  <Input
-                     id="password"
-                     type="password"
-                     {...register("password")}
-                  />
-                  {errors.password && (
-                     <p className="text-sm text-red-500">
-                        {errors.password.message}
-                     </p>
-                  )}
-               </Field>
-               <Button type="submit" disabled={isSubmitting}>
+      <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+         <div className="w-full max-w-sm flex flex-col gap-6">
+            <div className="flex flex-col items-center gap-3 text-center">
+               <WillowMark size={44} className="text-foreground" />
+               <div>
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Willow</p>
+                  <h1 className="text-xl font-bold tracking-tight mt-0.5">Create an account</h1>
+               </div>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
+               <div className="rounded-2xl border bg-card overflow-hidden divide-y">
+                  <div className="px-6 py-5">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">Username</p>
+                     <Input id="username" type="text" autoComplete="username" {...register("username")} />
+                     {errors.username && (
+                        <p className="text-sm text-destructive mt-1.5">{errors.username.message}</p>
+                     )}
+                  </div>
+                  <div className="px-6 py-5">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">Email</p>
+                     <Input id="email" type="email" autoComplete="email" {...register("email")} />
+                     {errors.email && (
+                        <p className="text-sm text-destructive mt-1.5">{errors.email.message}</p>
+                     )}
+                  </div>
+                  <div className="px-6 py-5">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">Password</p>
+                     <Input
+                        id="password"
+                        type="password"
+                        autoComplete="new-password"
+                        {...register("password")}
+                     />
+                     {errors.password && (
+                        <p className="text-sm text-destructive mt-1.5">{errors.password.message}</p>
+                     )}
+                  </div>
+               </div>
+
+               {serverError && (
+                  <p className="text-sm text-destructive text-center">{serverError}</p>
+               )}
+
+               <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
                   {isSubmitting ? "Creating account..." : "Create account"}
                </Button>
-               {serverError && (
-                  <p className="text-sm text-red-500 text-center">
-                     {serverError}
-                  </p>
-               )}
             </form>
-            <p className="text-sm text-center text-muted-foreground mt-2">
+
+            <p className="text-sm text-center text-muted-foreground">
                Already have an account?{" "}
-               <Link
-                  to="/login"
-                  className="text-foreground underline underline-offset-4"
-               >
+               <Link to="/login" className="text-foreground font-medium underline underline-offset-4">
                   Sign in
                </Link>
             </p>
