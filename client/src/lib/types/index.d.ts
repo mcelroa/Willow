@@ -86,6 +86,12 @@ type SaveMedicationDto = {
    schedules: MedicationSchedule[];
 };
 
+type AdherenceSummary = {
+   medicationId: string;
+   takenDays: number;
+   scheduledDays: number;
+};
+
 type MetricAverages = {
    mood: number;
    pain: number;

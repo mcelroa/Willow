@@ -105,7 +105,7 @@ src/
     LoadingSpinner.tsx # centered Loader2 spinner for loading states
     EmptyState.tsx    # icon + title + optional description + optional action; used for empty lists/no-data states
     TourGuide.tsx     # react-joyride v3 wrapper; auto-starts on first visit, marks page toured on finish/skip
-    WillowMark.tsx    # brand SVG mark; variant="full" (7 fronds, 72px+) or variant="small" (3 fronds, nav-sized); uses currentColor so wrap in a colored element or pass className
+    WillowMark.tsx    # brand SVG mark; variant="full" (7 fronds, 72px+) or variant="small" (3 fronds, nav-sized); uses currentColor so wrap in a colored element or pass className. Favicon (client/public/favicon.svg) mirrors the small variant with hardcoded #2e7d5c (hex approx of primary oklch).
   lib/
     api/agent.ts    # all API methods
     hooks/          # one React Query hook file per feature

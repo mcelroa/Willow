@@ -24,6 +24,7 @@ import { PageHeader } from "@/components/PageHeader";
 import TourGuide from "@/components/TourGuide";
 import { cn } from "@/lib/utils";
 import { useMedications } from "@/lib/hooks/useMedications";
+import { useAdherenceSummary } from "@/lib/hooks/useAdherence";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil, Pill, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
@@ -312,6 +313,7 @@ function MedicationFormFields({
 export default function Medications() {
    const { medications, isLoading, createMedication, updateMedication, deleteMedication } =
       useMedications();
+   const { data: adherenceSummary = [] } = useAdherenceSummary();
    const [showAddForm, setShowAddForm] = useState(false);
    const [editingId, setEditingId] = useState<string | null>(null);
    const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
@@ -510,8 +512,18 @@ export default function Medications() {
                                  </Button>
                               </div>
                            </div>
-                           <div className="px-5 py-3.5">
+                           <div className="px-5 py-3.5 flex flex-col gap-0.5">
                               <p className="text-xs text-muted-foreground">{formatSchedule(med)}</p>
+                              {(() => {
+                                 const s = adherenceSummary.find((a) => a.medicationId === med.id);
+                                 if (!s || s.scheduledDays === 0) return null;
+                                 const rate = Math.min(100, Math.round((s.takenDays / s.scheduledDays) * 100));
+                                 return (
+                                    <p className="text-xs text-muted-foreground">
+                                       {s.takenDays}/{s.scheduledDays} days taken · {rate}% adherence (30 days)
+                                    </p>
+                                 );
+                              })()}
                            </div>
                         </div>
                      )

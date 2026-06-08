@@ -93,6 +93,16 @@ const agent = {
          requests.put<Medication>(`/medications/${id}`, dto),
       delete: (id: string) => requests.delete<void>(`/medications/${id}`),
    },
+   Adherence: {
+      getDaily: (date: string) =>
+         requests.get<string[]>(`/medication-adherence?date=${date}`),
+      markTaken: (medicationId: string, date: string) =>
+         requests.post<void>("/medication-adherence", { medicationId, date }),
+      unmarkTaken: (medicationId: string, date: string) =>
+         requests.delete<void>(`/medication-adherence/${medicationId}?date=${date}`),
+      getSummary: (days = 30) =>
+         requests.get<AdherenceSummary[]>(`/medication-adherence/summary?days=${days}`),
+   },
    Sharing: {
       list: () => requests.get<ShareLink[]>("/sharing"),
       create: (dto: CreateShareLinkDto) =>

@@ -11,6 +11,7 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
     public DbSet<ShareLink> ShareLinks { get; set; } = null!;
     public DbSet<Medication> Medications { get; set; } = null!;
     public DbSet<MedicationSchedule> MedicationSchedules { get; set; } = null!;
+    public DbSet<MedicationAdherence> MedicationAdherences { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -32,6 +33,16 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
             .HasMany(m => m.Schedules)
             .WithOne(s => s.Medication)
             .HasForeignKey(s => s.MedicationId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<MedicationAdherence>()
+            .HasIndex(a => new { a.UserId, a.MedicationId, a.Date })
+            .IsUnique();
+
+        builder.Entity<MedicationAdherence>()
+            .HasOne(a => a.Medication)
+            .WithMany()
+            .HasForeignKey(a => a.MedicationId)
             .OnDelete(DeleteBehavior.Cascade);
     }
 }

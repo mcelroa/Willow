@@ -18,10 +18,12 @@ import { Textarea } from "@/components/ui/textarea";
 import TourGuide from "@/components/TourGuide";
 import { useCheckIn } from "@/lib/hooks/useCheckIn";
 import { useMedications } from "@/lib/hooks/useMedications";
+import { useDailyAdherence, useMarkTaken, useUnmarkTaken } from "@/lib/hooks/useAdherence";
 import { checkInSchema, type CheckInSchema } from "@/lib/schemas/checkInSchema";
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format, parseISO } from "date-fns";
-import { CalendarIcon, Pill } from "lucide-react";
+import { CalendarIcon, CheckCircle2, Circle } from "lucide-react";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { Link } from "react-router";
@@ -44,24 +46,13 @@ const SYMPTOM_LABELS: Record<string, string> = {
 
 export default function CheckIn() {
    const today = new Date().toISOString().split("T")[0];
-   const todayDow = new Date().getDay();
 
    const { createCheckIn, checkIns } = useCheckIn();
    const { medications } = useMedications();
+   const markTaken = useMarkTaken();
+   const unmarkTaken = useUnmarkTaken();
 
    const [suggestions, setSuggestions] = useState<{ symptom: string; meds: string[] }[]>([]);
-
-   const todaysMedications = medications
-      .filter((m) => m.isActive && m.schedules.some((s) => s.dayOfWeek === todayDow))
-      .map((m) => ({
-         name: m.name,
-         dosage: m.dosage,
-         times: m.schedules
-            .filter((s) => s.dayOfWeek === todayDow)
-            .map((s) => s.time)
-            .sort(),
-      }))
-      .sort((a, b) => a.times[0].localeCompare(b.times[0]));
 
    const {
       register,
@@ -93,6 +84,22 @@ export default function CheckIn() {
 
    const watchedDate = useWatch({ control, name: "date" });
    const existingEntry = checkIns.find((c) => c.date === watchedDate);
+
+   const selectedDow = watchedDate ? parseISO(watchedDate).getDay() : new Date().getDay();
+   const scheduledMeds = medications
+      .filter((m) => m.isActive && m.schedules.some((s) => s.dayOfWeek === selectedDow))
+      .map((m) => ({
+         id: m.id,
+         name: m.name,
+         dosage: m.dosage,
+         times: m.schedules
+            .filter((s) => s.dayOfWeek === selectedDow)
+            .map((s) => s.time)
+            .sort(),
+      }))
+      .sort((a, b) => a.times[0].localeCompare(b.times[0]));
+
+   const { data: takenMedIds = [] } = useDailyAdherence(watchedDate ?? today);
 
    const onSubmit = (data: CheckInSchema) => {
       createCheckIn.mutate(data, {
@@ -142,6 +149,11 @@ export default function CheckIn() {
          disableBeacon: true,
       },
       {
+         target: "#checkin-medications",
+         content: "If you have medications scheduled for today, check them off here. Your adherence is tracked over time and shown on the Medications page.",
+         disableBeacon: true,
+      },
+      {
          target: "#checkin-weight",
          content: "Optionally record your weight in kg. This is tracked separately with its own trend graph.",
          disableBeacon: true,
@@ -169,24 +181,6 @@ export default function CheckIn() {
             </p>
             <h1 className="text-2xl font-bold tracking-tight">Daily check-in</h1>
          </div>
-
-         {todaysMedications.length > 0 && (
-            <div className="flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3.5 text-sm">
-               <Pill className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
-               <div>
-                  <p className="font-semibold text-primary mb-1">Medications today</p>
-                  <ul className="flex flex-col gap-0.5 text-muted-foreground">
-                     {todaysMedications.map((m, i) => (
-                        <li key={i}>
-                           {m.dosage ? `${m.name} ${m.dosage}` : m.name}
-                           {" · "}
-                           {m.times.join(", ")}
-                        </li>
-                     ))}
-                  </ul>
-               </div>
-            </div>
-         )}
 
          <form onSubmit={handleSubmit(onSubmit)}>
             <div className="rounded-2xl border bg-card overflow-hidden divide-y">
@@ -262,6 +256,49 @@ export default function CheckIn() {
                      ))}
                   </div>
                </div>
+
+               {scheduledMeds.length > 0 && (
+                  <div id="checkin-medications" className="px-6 py-5">
+                     <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
+                        Medications today
+                     </p>
+                     <div className="flex flex-col gap-2.5">
+                        {scheduledMeds.map((med) => {
+                           const isTaken = takenMedIds.includes(med.id);
+                           const isPending = markTaken.isPending || unmarkTaken.isPending;
+                           return (
+                              <button
+                                 key={med.id}
+                                 type="button"
+                                 disabled={isPending}
+                                 onClick={() => {
+                                    if (isTaken) {
+                                       unmarkTaken.mutate({ medicationId: med.id, date: watchedDate ?? today });
+                                    } else {
+                                       markTaken.mutate({ medicationId: med.id, date: watchedDate ?? today });
+                                    }
+                                 }}
+                                 className="flex items-center gap-3 text-left group disabled:opacity-50"
+                              >
+                                 {isTaken ? (
+                                    <CheckCircle2 className="h-4.5 w-4.5 shrink-0 text-primary" />
+                                 ) : (
+                                    <Circle className="h-4.5 w-4.5 shrink-0 text-muted-foreground/40 group-hover:text-muted-foreground transition-colors" />
+                                 )}
+                                 <span className="text-sm flex-1">
+                                    <span className={cn("font-medium", isTaken && "line-through text-muted-foreground")}>
+                                       {med.dosage ? `${med.name} ${med.dosage}` : med.name}
+                                    </span>
+                                    <span className="text-muted-foreground ml-1.5">
+                                       · {med.times.join(", ")}
+                                    </span>
+                                 </span>
+                              </button>
+                           );
+                        })}
+                     </div>
+                  </div>
+               )}
 
                <div id="checkin-weight" className="px-6 py-5">
                   <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground mb-3">
