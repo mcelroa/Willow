@@ -84,7 +84,7 @@ jobs:
 
       - name: Render task definition with new image
         id: taskdef
-        uses: aws-actions/amazon-ecs-render-task-definition@v3
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: .aws-setup/task-definition.json
           container-name: willow-api
