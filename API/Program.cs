@@ -150,6 +150,7 @@ app.UseCors(x =>
 app.UseAuthentication();
 app.UseAuthorization();
 if (!app.Environment.IsEnvironment("Testing") && !app.Environment.IsDevelopment()) app.UseRateLimiter();
+app.MapGet("/health", () => Results.Ok("healthy"));
 app.MapControllers();
 
 if (!app.Environment.IsEnvironment("Testing"))
