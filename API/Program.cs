@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Application.Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 
@@ -21,6 +22,15 @@ var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 builder.Services.AddControllers();
+
+// Behind the ALB the connection IP is the load balancer's, not the client's.
+// Restore the real client IP from X-Forwarded-For so rate limiting partitions
+// per user — but only trust the header when the request comes from inside the VPC.
+builder.Services.Configure<ForwardedHeadersOptions>(opt =>
+{
+    opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    opt.KnownIPNetworks.Add(System.Net.IPNetwork.Parse("172.31.0.0/16"));
+});
 
 var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
 string? connectionString;
@@ -121,6 +131,8 @@ builder.Services.AddHostedService<ReminderBackgroundService>();
 
 
 var app = builder.Build();
+
+app.UseForwardedHeaders();
 
 app.UseExceptionHandler(errorApp => errorApp.Run(async context =>
 {
