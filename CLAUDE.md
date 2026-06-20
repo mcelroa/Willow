@@ -137,16 +137,20 @@ Start local Postgres: `docker compose up postgres -d`
 
 In production the connection string comes from a `DATABASE_URL` env var (`postgres://user:pass@host:port/db` — parsed in `Program.cs`, takes precedence over `ConnectionStrings`).
 
-## Deployment (Render)
+## Deployment (Azure)
 
-Production: **frontend on Vercel** (`willow-health.pro`, `VITE_API_URL=https://api.willow-health.pro/api` — the `/api` suffix is required, it's the verbatim axios baseURL), **API on Render** (Web Service, Docker deploy), **DB on Render Postgres**.
+Production: **frontend on Azure Static Web Apps** (`VITE_API_URL=https://willow-api.azurewebsites.net/api` — the `/api` suffix is required, it's the verbatim axios baseURL), **API on Azure App Service** (`willow-api`), **DB on Azure Database for PostgreSQL**.
 
-- **Deploying = push to `main`**: CI runs tests first; the `deploy` job then POSTs to `RENDER_DEPLOY_HOOK_URL` (GitHub secret). Render builds from the Dockerfile automatically. Auto-deploy must be **disabled** in the Render dashboard so deploys only fire when CI passes.
-- **Secrets** set as Render environment variables: `DATABASE_URL` (Render provides this from the linked Postgres service), `Jwt__Key`, `Resend__ApiKey`. **Non-secret env**: `ASPNETCORE_ENVIRONMENT=Production`, `ClientUrl`, `CORS_ORIGIN`, `Resend__FromEmail`.
-- `DATABASE_URL` from Render is a `postgres://` URI — the existing parsing in `Program.cs` handles it.
-- `ReminderBackgroundService` runs in-process — keep the service at 1 instance to avoid duplicate reminder emails.
-- DNS at Namecheap — point `api.willow-health.pro` CNAME to the Render service's `.onrender.com` hostname. Add the custom domain in the Render dashboard to get TLS.
-- `/health` endpoint is used for Render health checks — don't remove or rename without updating the service health-check config.
+### Two separate CI/CD workflows
+- `.github/workflows/ci.yml` — runs `.NET Tests` + `Frontend Build` in parallel, then `Deploy to Azure` job (main pushes only). Builds Docker image, pushes to Docker Hub (`gillarua/willow-api:latest`), deploys to App Service via `azure/webapps-deploy@v3`.
+- `.github/workflows/azure-static-web-apps-black-bush-0c60fd403.yml` — Azure-generated workflow; builds and deploys the React frontend to Azure Static Web Apps on every push to main and on PRs (preview environments on PRs, cleanup on PR close).
+
+### Key deployment details
+- **GitHub secrets needed**: `DOCKER_USERNAME`, `DOCKER_PASSWORD`, `AZURE_PUBLISH_PROFILE` (App Service publish profile), `AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_BUSH_0C60FD403`.
+- **SPA routing**: `client/public/staticwebapp.config.json` — `navigationFallback` rewrites all non-asset paths to `/index.html` (replaces nginx `try_files`).
+- **App Service env vars**: `DATABASE_URL` (`postgres://` URI parsed in `Program.cs`), `Jwt__Key`, `Resend__ApiKey`, `ASPNETCORE_ENVIRONMENT=Production`, `ClientUrl`, `CORS_ORIGIN`, `Resend__FromEmail`.
+- `ReminderBackgroundService` runs in-process — keep App Service at 1 instance to avoid duplicate reminder emails.
+- `/health` endpoint is used for App Service health checks — don't remove or rename without updating the health-check config.
 
 ## Testing
 
