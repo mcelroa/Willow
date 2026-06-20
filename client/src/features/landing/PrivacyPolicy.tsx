@@ -101,12 +101,12 @@ export default function PrivacyPolicy() {
                   <p className="text-muted-foreground">
                      Your data is stored in a PostgreSQL database hosted on{" "}
                      <a
-                        href="https://render.com"
+                        href="https://azure.microsoft.com"
                         className="underline underline-offset-4"
                         target="_blank"
                         rel="noopener noreferrer"
                      >
-                        Render
+                        Microsoft Azure
                      </a>
                      . Account emails are sent via{" "}
                      <a
