@@ -53,6 +53,8 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 - `ResendEmailService` sends password reset and email verification emails via Resend HTTP API
 - Exception middleware catches `ValidationException` → structured `400`
 - Rate limiting via built-in `AddRateLimiter`: `"auth"` policy (5 req/15 min) on login/register/reset-password, `"auth-strict"` (3 req/hr) on forgot-password, `"public-read"` (30 req/min) on the anonymous share-view endpoint. All disabled in the `Testing` environment.
+- `UseForwardedHeaders` runs **first** in the pipeline — behind the ALB the connection IP is the load balancer's, so the real client IP is restored from `X-Forwarded-For` (trusted only from the VPC CIDR `172.31.0.0/16`, default `ForwardLimit=1` so client-spoofed values are ignored). Rate limiting depends on this — don't reorder.
+- `GET /health` — anonymous 200, used by the ALB target group health check. Don't remove or rename without updating the target group.
 
 ### Authentication
 JWT stored in `localStorage` under `"jwt"`. Axios interceptor in `agent.ts` attaches it to every request. A response interceptor catches 401s **that had a token attached** (expired/revoked), clears localStorage, and redirects to `/login`. On app load `useAccount` calls `GET /api/account` to rehydrate the current user — this returns 401 if the account's email is not verified.
@@ -132,6 +134,19 @@ src/
 }
 ```
 Start local Postgres: `docker compose up postgres -d`
+
+In production the connection string comes from a `DATABASE_URL` env var (`postgres://user:pass@host:port/db` — parsed in `Program.cs`, takes precedence over `ConnectionStrings`).
+
+## Deployment (Render)
+
+Production: **frontend on Vercel** (`willow-health.pro`, `VITE_API_URL=https://api.willow-health.pro/api` — the `/api` suffix is required, it's the verbatim axios baseURL), **API on Render** (Web Service, Docker deploy), **DB on Render Postgres**.
+
+- **Deploying = push to `main`**: CI runs tests first; the `deploy` job then POSTs to `RENDER_DEPLOY_HOOK_URL` (GitHub secret). Render builds from the Dockerfile automatically. Auto-deploy must be **disabled** in the Render dashboard so deploys only fire when CI passes.
+- **Secrets** set as Render environment variables: `DATABASE_URL` (Render provides this from the linked Postgres service), `Jwt__Key`, `Resend__ApiKey`. **Non-secret env**: `ASPNETCORE_ENVIRONMENT=Production`, `ClientUrl`, `CORS_ORIGIN`, `Resend__FromEmail`.
+- `DATABASE_URL` from Render is a `postgres://` URI — the existing parsing in `Program.cs` handles it.
+- `ReminderBackgroundService` runs in-process — keep the service at 1 instance to avoid duplicate reminder emails.
+- DNS at Namecheap — point `api.willow-health.pro` CNAME to the Render service's `.onrender.com` hostname. Add the custom domain in the Render dashboard to get TLS.
+- `/health` endpoint is used for Render health checks — don't remove or rename without updating the service health-check config.
 
 ## Testing
 
