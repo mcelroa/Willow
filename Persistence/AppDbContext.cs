@@ -43,6 +43,6 @@ public class AppDbContext(DbContextOptions options) : IdentityDbContext<AppUser>
             .HasOne(a => a.Medication)
             .WithMany()
             .HasForeignKey(a => a.MedicationId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.ClientCascade);
     }
 }

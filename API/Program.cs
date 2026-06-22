@@ -22,34 +22,21 @@ QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 builder.Services.AddControllers();
 
-// Behind Render's proxy the connection IP is the load balancer's, not the client's.
+// Behind Azure App Service's proxy the connection IP is the load balancer's, not the client's.
 // Clear all network restrictions so the middleware trusts X-Forwarded-For from
-// Render's proxy (whose IP range is not fixed). Safe because the container is
-// not directly reachable from the internet — Render's proxy always sits in front.
+// Azure's proxy (whose IP range is not fixed). Safe because the container is
+// not directly reachable from the internet — Azure's infrastructure always sits in front.
 builder.Services.Configure<ForwardedHeadersOptions>(opt =>
 {
     opt.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    opt.KnownNetworks.Clear();
+    opt.KnownIPNetworks.Clear();
     opt.KnownProxies.Clear();
 });
 
-var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
-string? connectionString;
-
-if (!string.IsNullOrEmpty(databaseUrl))
-{
-    var uri = new Uri(databaseUrl);
-    var userInfo = uri.UserInfo.Split(':');
-    var port = uri.Port > 0 ? uri.Port : 5432;
-    connectionString = $"Host={uri.Host};Port={port};Database={uri.AbsolutePath.TrimStart('/')};Username={userInfo[0]};Password={userInfo[1]};SSL Mode=Require;Trust Server Certificate=true";
-}
-else
-{
-    connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-}
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(opt =>
-    opt.UseNpgsql(connectionString)
+    opt.UseSqlServer(connectionString)
 );
 builder.Services.AddCors();
 builder.Services.AddMediatR(x =>

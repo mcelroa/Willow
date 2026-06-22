@@ -127,19 +127,17 @@ src/
 ### Config (`appsettings.Development.json` — gitignored)
 ```json
 {
-  "ConnectionStrings": { "DefaultConnection": "Host=localhost;Port=5432;..." },
+  "ConnectionStrings": { "DefaultConnection": "Server=localhost,1433;Database=willow;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true" },
   "Jwt": { "Key": "<≥64 chars>" },
   "ClientUrl": "https://localhost:3000",
   "Resend": { "ApiKey": "", "FromEmail": "noreply@willow-health.pro" }
 }
 ```
-Start local Postgres: `docker compose up postgres -d`
-
-In production the connection string comes from a `DATABASE_URL` env var (`postgres://user:pass@host:port/db` — parsed in `Program.cs`, takes precedence over `ConnectionStrings`).
+Start local SQL Server: `docker compose up mssql -d`
 
 ## Deployment (Azure)
 
-Production: **frontend on Azure Static Web Apps** (`VITE_API_URL=https://willow-api.azurewebsites.net/api` — the `/api` suffix is required, it's the verbatim axios baseURL), **API on Azure App Service** (`willow-api`), **DB on Azure Database for PostgreSQL**.
+Production: **frontend on Azure Static Web Apps** (`VITE_API_URL=https://willow-api.azurewebsites.net/api` — the `/api` suffix is required, it's the verbatim axios baseURL), **API on Azure App Service** (`willow-api`), **DB on Azure SQL Database**.
 
 ### Two separate CI/CD workflows
 - `.github/workflows/ci.yml` — runs `.NET Tests` + `Frontend Build` in parallel, then `Deploy to Azure` job (main pushes only). Builds Docker image, pushes to Docker Hub (`gillarua/willow-api:latest`), deploys to App Service via `azure/webapps-deploy@v3`.
@@ -148,7 +146,7 @@ Production: **frontend on Azure Static Web Apps** (`VITE_API_URL=https://willow-
 ### Key deployment details
 - **GitHub secrets needed**: `DOCKER_USERNAME`, `DOCKER_PASSWORD`, `AZURE_PUBLISH_PROFILE` (App Service publish profile), `AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_BUSH_0C60FD403`.
 - **SPA routing**: `client/public/staticwebapp.config.json` — `navigationFallback` rewrites all non-asset paths to `/index.html` (replaces nginx `try_files`).
-- **App Service env vars**: `DATABASE_URL` (`postgres://` URI parsed in `Program.cs`), `Jwt__Key`, `Resend__ApiKey`, `ASPNETCORE_ENVIRONMENT=Production`, `ClientUrl`, `CORS_ORIGIN`, `Resend__FromEmail`.
+- **App Service env vars**: `ConnectionStrings__DefaultConnection` (SQL Server ADO.NET connection string), `Jwt__Key`, `Resend__ApiKey`, `ASPNETCORE_ENVIRONMENT=Production`, `ClientUrl`, `CORS_ORIGIN`, `Resend__FromEmail`. Alternatively set via the App Service "Connection strings" blade as `DefaultConnection` (type: SQLAzure).
 - `ReminderBackgroundService` runs in-process — keep App Service at 1 instance to avoid duplicate reminder emails.
 - `/health` endpoint is used for App Service health checks — don't remove or rename without updating the health-check config.
 
@@ -156,7 +154,7 @@ Production: **frontend on Azure Static Web Apps** (`VITE_API_URL=https://willow-
 
 ### Backend — xUnit
 - `Tests.Unit` — handler-level, EF Core InMemory + Moq
-- `Tests.Integration` — full HTTP via `WebApplicationFactory`. Uses `UseInternalServiceProvider` to avoid Npgsql/InMemory conflict in EF Core 10. Controllers covered: `AccountController`, `CheckInsController`, `QuestionsController`, `SharingController`. `MedicationsController` has no integration tests yet.
+- `Tests.Integration` — full HTTP via `WebApplicationFactory`. Uses `UseInternalServiceProvider` to avoid SqlServer/InMemory provider conflict in EF Core 10. Controllers covered: `AccountController`, `CheckInsController`, `QuestionsController`, `SharingController`. `MedicationsController` has no integration tests yet.
 - `HandleResult(Result<Unit>)` returns **204 NoContent** — assert `HttpStatusCode.NoContent` for delete/patch
 - Plain-string response: `ReadAsStringAsync().Trim('"')` — `Ok(string)` returns `text/plain`
 - Rate limiting is disabled in `Testing` environment — no need to work around it in tests
