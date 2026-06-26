@@ -56,6 +56,16 @@ public class ClaudeAiService(IHttpClientFactory httpClientFactory, IConfiguratio
             .GetProperty("text")
             .GetString() ?? "[]";
 
+        // Strip markdown code fences if Claude wraps the JSON in ```json ... ```
+        text = text.Trim();
+        if (text.StartsWith("```"))
+        {
+            var firstNewline = text.IndexOf('\n');
+            var lastFence = text.LastIndexOf("```");
+            if (firstNewline >= 0 && lastFence > firstNewline)
+                text = text[(firstNewline + 1)..lastFence].Trim();
+        }
+
         return JsonSerializer.Deserialize<List<string>>(text) ?? [];
     }
 
