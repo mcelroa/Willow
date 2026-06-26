@@ -17,18 +17,49 @@ import { EmptyState } from "@/components/EmptyState";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PageHeader } from "@/components/PageHeader";
 import { useQuestion } from "@/lib/hooks/useQuestion";
-import { CheckCircle2, MessageCircle } from "lucide-react";
+import { CheckCircle2, MessageCircle, Plus, Sparkles } from "lucide-react";
 import {
    questionSchema,
    type QuestionFormValues,
 } from "@/lib/schemas/questionSchema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { toast } from "sonner";
 
 export default function Questions() {
-   const { questions, isLoading, createQuestion, deleteQuestion, markAsked } =
-      useQuestion();
+   const {
+      questions,
+      isLoading,
+      suggestions,
+      isFetchingSuggestions,
+      fetchSuggestions,
+      createQuestion,
+      deleteQuestion,
+      markAsked,
+   } = useQuestion();
+
+   const [showSuggestions, setShowSuggestions] = useState(false);
+   const [addedSuggestions, setAddedSuggestions] = useState<Set<string>>(new Set());
+
+   const handleSuggest = () => {
+      setShowSuggestions(true);
+      setAddedSuggestions(new Set());
+      fetchSuggestions();
+   };
+
+   const handleAddSuggestion = (text: string) => {
+      createQuestion.mutate(
+         { text },
+         {
+            onSuccess: () => {
+               setAddedSuggestions((prev) => new Set(prev).add(text));
+               toast.success("Question added.");
+            },
+            onError: () => toast.error("Something went wrong."),
+         },
+      );
+   };
 
    const {
       register,
@@ -111,6 +142,69 @@ export default function Questions() {
                            </Button>
                         </form>
                      </div>
+                  </div>
+
+                  <div className="rounded-2xl border bg-card overflow-hidden">
+                     <div className="px-5 py-3.5 border-b flex items-center justify-between">
+                        <div>
+                           <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                              AI suggestions
+                           </p>
+                           <p className="text-xs text-muted-foreground mt-0.5">
+                              Based on your recent symptoms and medications
+                           </p>
+                        </div>
+                        <Button
+                           variant="outline"
+                           size="sm"
+                           className="shrink-0 ml-4 gap-1.5"
+                           onClick={handleSuggest}
+                           disabled={isFetchingSuggestions}
+                        >
+                           <Sparkles className="h-3.5 w-3.5" />
+                           {showSuggestions ? "Refresh" : "Suggest"}
+                        </Button>
+                     </div>
+
+                     {!showSuggestions && (
+                        <p className="px-5 py-4 text-sm text-muted-foreground">
+                           Click Suggest to get AI-powered question ideas tailored to your recent check-ins.
+                        </p>
+                     )}
+
+                     {showSuggestions && isFetchingSuggestions && (
+                        <p className="px-5 py-4 text-sm text-muted-foreground animate-pulse">
+                           Analysing your symptoms and medications…
+                        </p>
+                     )}
+
+                     {showSuggestions && !isFetchingSuggestions && suggestions && (
+                        suggestions.filter((s) => !addedSuggestions.has(s)).length === 0 ? (
+                           <p className="px-5 py-4 text-sm text-muted-foreground">
+                              All suggestions have been added to your list.
+                           </p>
+                        ) : (
+                           <div className="divide-y">
+                              {suggestions
+                                 .filter((s) => !addedSuggestions.has(s))
+                                 .map((suggestion) => (
+                                    <div key={suggestion} className="px-5 py-3.5 flex items-start gap-3">
+                                       <p className="flex-1 text-sm leading-relaxed">{suggestion}</p>
+                                       <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          className="shrink-0 gap-1 text-primary hover:text-primary"
+                                          onClick={() => handleAddSuggestion(suggestion)}
+                                          disabled={createQuestion.isPending}
+                                       >
+                                          <Plus className="h-3.5 w-3.5" />
+                                          Add
+                                       </Button>
+                                    </div>
+                                 ))}
+                           </div>
+                        )
+                     )}
                   </div>
 
                   {pending.length === 0 && (

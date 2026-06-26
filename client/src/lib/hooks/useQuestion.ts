@@ -9,6 +9,17 @@ export const useQuestion = () => {
       queryFn: () => agent.Questions.list(),
    });
 
+   const {
+      data: suggestions,
+      isFetching: isFetchingSuggestions,
+      refetch: fetchSuggestions,
+   } = useQuery({
+      queryKey: ["question-suggestions"],
+      queryFn: () => agent.Questions.getSuggestions(),
+      enabled: false,
+      staleTime: 5 * 60 * 1000,
+   });
+
    const createQuestion = useMutation({
       mutationFn: (dto: CreateQuestionDto) => agent.Questions.create(dto),
       onSuccess: () => {
@@ -33,6 +44,9 @@ export const useQuestion = () => {
    return {
       questions,
       isLoading,
+      suggestions,
+      isFetchingSuggestions,
+      fetchSuggestions,
       createQuestion,
       deleteQuestion,
       markAsked,

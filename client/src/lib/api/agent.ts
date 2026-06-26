@@ -79,6 +79,7 @@ const agent = {
       delete: (id: string) => requests.delete<void>(`/questions/${id}`),
       markAsked: (id: string) =>
          requests.patch<void>(`/questions/${id}/mark-asked`),
+      getSuggestions: () => requests.get<string[]>("/questions/suggestions"),
    },
    Export: {
       pdf: () =>

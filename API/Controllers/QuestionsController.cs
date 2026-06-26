@@ -32,4 +32,10 @@ public class QuestionsController : BaseApiController
     {
         return HandleResult(await Mediator.Send(new MarkAsked.Command { Id = id }));
     }
+
+    [HttpGet("suggestions")]
+    public async Task<ActionResult<List<string>>> GetSuggestions()
+    {
+        return HandleResult(await Mediator.Send(new GetQuestionSuggestions.Query()));
+    }
 }

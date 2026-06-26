@@ -112,6 +112,7 @@ if (!builder.Environment.IsEnvironment("Testing") && !builder.Environment.IsDeve
 builder.Services.AddHttpClient();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<IEmailService, ResendEmailService>();
+builder.Services.AddScoped<IAiService, ClaudeAiService>();
 builder.Services.AddScoped<PdfExportService>();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUserAccessor, UserAccessor>();
