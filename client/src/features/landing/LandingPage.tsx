@@ -63,7 +63,10 @@ const features = [
 
 // ─── component ────────────────────────────────────────────────────────────────
 export default function LandingPage() {
-   const { currentUser, loadingUser } = useAccount();
+   // Render logged-out CTAs immediately — never gate the landing page on the
+   // /api/account rehydrate call (which can be slow on a cold API). If a user
+   // turns out to be signed in, the CTAs upgrade to "Open app" once it resolves.
+   const { currentUser } = useAccount();
 
    return (
       <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", fontFamily: "'Figtree Variable', sans-serif" }}>
@@ -87,20 +90,18 @@ export default function LandingPage() {
                   </span>
                </Link>
 
-               {!loadingUser && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                     {currentUser ? (
-                        <Link to="/checkin" style={navBtnPrimary}>
-                           Open app →
-                        </Link>
-                     ) : (
-                        <>
-                           <Link to="/login" style={navBtnGhost}>Log in</Link>
-                           <Link to="/register" style={navBtnPrimary}>Get started →</Link>
-                        </>
-                     )}
-                  </div>
-               )}
+               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  {currentUser ? (
+                     <Link to="/checkin" style={navBtnPrimary}>
+                        Open app →
+                     </Link>
+                  ) : (
+                     <>
+                        <Link to="/login" style={navBtnGhost}>Log in</Link>
+                        <Link to="/register" style={navBtnPrimary}>Get started →</Link>
+                     </>
+                  )}
+               </div>
             </div>
          </header>
 
@@ -163,18 +164,16 @@ export default function LandingPage() {
                </p>
 
                {/* CTA buttons */}
-               {!loadingUser && (
-                  <div className="wl-cta" style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-                     {currentUser ? (
-                        <Link to="/checkin" style={heroBtnPrimary}>Open app →</Link>
-                     ) : (
-                        <>
-                           <Link to="/register" style={heroBtnPrimary}>Get started free</Link>
-                           <Link to="/login" style={heroBtnGhost}>Log in</Link>
-                        </>
-                     )}
-                  </div>
-               )}
+               <div className="wl-cta" style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                  {currentUser ? (
+                     <Link to="/checkin" style={heroBtnPrimary}>Open app →</Link>
+                  ) : (
+                     <>
+                        <Link to="/register" style={heroBtnPrimary}>Get started free</Link>
+                        <Link to="/login" style={heroBtnGhost}>Log in</Link>
+                     </>
+                  )}
+               </div>
             </div>
          </section>
 
@@ -251,7 +250,7 @@ export default function LandingPage() {
          </section>
 
          {/* ── bottom CTA ── */}
-         {!loadingUser && !currentUser && (
+         {!currentUser && (
             <section style={{
                background: `linear-gradient(155deg, ${C.forest} 0%, ${C.forestMid} 100%)`,
                padding: "clamp(80px, 12vw, 120px) 24px",

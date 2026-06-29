@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useSearchParams } from "react-router";
+import { Loader2 } from "lucide-react";
 
 export default function ResetPassword() {
    const [searchParams] = useSearchParams();
@@ -133,7 +134,14 @@ export default function ResetPassword() {
                )}
 
                <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
-                  {isSubmitting ? "Resetting..." : "Reset password"}
+                  {isSubmitting ? (
+                     <>
+                        <Loader2 className="animate-spin" />
+                        Resetting...
+                     </>
+                  ) : (
+                     "Reset password"
+                  )}
                </Button>
             </form>
          </div>

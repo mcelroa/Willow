@@ -10,6 +10,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
+import { Loader2 } from "lucide-react";
 
 export default function ForgotPassword() {
    const [submitted, setSubmitted] = useState(false);
@@ -86,7 +87,14 @@ export default function ForgotPassword() {
                )}
 
                <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
-                  {isSubmitting ? "Sending..." : "Send reset link"}
+                  {isSubmitting ? (
+                     <>
+                        <Loader2 className="animate-spin" />
+                        Sending...
+                     </>
+                  ) : (
+                     "Send reset link"
+                  )}
                </Button>
             </form>
 

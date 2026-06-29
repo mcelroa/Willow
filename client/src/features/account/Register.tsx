@@ -7,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
+import { Loader2 } from "lucide-react";
 
 export default function Register() {
    const [submitted, setSubmitted] = useState(false);
@@ -99,7 +100,14 @@ export default function Register() {
                )}
 
                <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
-                  {isSubmitting ? "Creating account..." : "Create account"}
+                  {isSubmitting ? (
+                     <>
+                        <Loader2 className="animate-spin" />
+                        Creating account...
+                     </>
+                  ) : (
+                     "Create account"
+                  )}
                </Button>
             </form>
 

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import { WillowMark } from "@/components/WillowMark";
+import { Loader2 } from "lucide-react";
 
 export default function Login() {
    const { loginUser } = useAccount();
@@ -13,7 +14,7 @@ export default function Login() {
    const {
       register,
       handleSubmit,
-      formState: { errors, isSubmitting },
+      formState: { errors },
    } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema) });
 
    const onSubmit = (data: LoginSchema) => {
@@ -66,8 +67,15 @@ export default function Login() {
                   <p className="text-sm text-destructive text-center">Invalid email or password</p>
                )}
 
-               <Button type="submit" className="w-full h-11 font-semibold" disabled={isSubmitting}>
-                  {isSubmitting ? "Signing in..." : "Sign in"}
+               <Button type="submit" className="w-full h-11 font-semibold" disabled={loginUser.isPending}>
+                  {loginUser.isPending ? (
+                     <>
+                        <Loader2 className="animate-spin" />
+                        Signing in...
+                     </>
+                  ) : (
+                     "Sign in"
+                  )}
                </Button>
             </form>
 
