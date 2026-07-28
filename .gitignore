@@ -6,6 +6,9 @@
 # dotenv files
 .env
 
+# Personal interview prep (not part of the app)
+interview-prep/
+
 # User-specific files
 *.rsuser
 *.suo
