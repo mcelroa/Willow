@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router";
 import { WillowMark } from "@/components/WillowMark";
 import { Loader2 } from "lucide-react";
+import { DEMO_EMAIL, DEMO_PASSWORD, isDemoMode } from "@/lib/demo";
 
 export default function Login() {
    const { loginUser } = useAccount();
@@ -15,7 +16,12 @@ export default function Login() {
       register,
       handleSubmit,
       formState: { errors },
-   } = useForm<LoginSchema>({ resolver: zodResolver(loginSchema) });
+   } = useForm<LoginSchema>({
+      resolver: zodResolver(loginSchema),
+      // In demo mode the credentials are prefilled so a visitor can sign straight
+      // in. They're still checked properly, so a wrong password still fails.
+      defaultValues: isDemoMode ? { email: DEMO_EMAIL, password: DEMO_PASSWORD } : undefined,
+   });
 
    const onSubmit = (data: LoginSchema) => {
       loginUser.mutate(data);
@@ -31,6 +37,17 @@ export default function Login() {
                   <h1 className="text-xl font-bold tracking-tight mt-0.5">Sign in to your account</h1>
                </div>
             </div>
+
+            {isDemoMode && (
+               <div className="rounded-2xl border border-primary/30 bg-primary/5 px-4 py-3 text-center">
+                  <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">
+                     Demo
+                  </p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                     Credentials are filled in for you — just press Sign in.
+                  </p>
+               </div>
+            )}
 
             <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-4">
                <div className="rounded-2xl border bg-card overflow-hidden divide-y">

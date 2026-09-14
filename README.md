@@ -4,9 +4,13 @@ A symptom tracker for people going through cancer treatment.
 
 Treatment days blur together. By the time you're back in front of your care team, it's hard to remember whether the nausea was worse on Tuesday or Thursday, or which day the fatigue really hit. Willow is a quiet daily check-in: rate how you're doing, jot a note, and keep a running list of questions to bring to your next appointment. Over time it turns scattered days into something you can actually look at — and hand to your doctor.
 
-It's a full-stack app: a .NET 10 API backed by Azure SQL, and a React 19 single-page frontend — deployed on Azure (Static Web Apps + App Service).
+It's a full-stack app: a .NET 10 API using EF Core and SQL Server, and a React 19 single-page frontend.
 
-🔗 **Live:** [willow-health.pro](https://willow-health.pro)
+🔗 **Live demo:** _(set this to your Vercel URL)_
+
+> **About the demo.** The live link runs the real frontend against a **mocked backend** — [MSW](https://mswjs.io) intercepts every API call in the browser and serves seeded data from `localStorage`. It's fully interactive: add a check-in, log a dose, generate a share link, export a PDF. Your changes persist in your browser and are visible only to you, and a **Reset demo data** button restores the original sample data.
+>
+> This is a hosting decision, not an architectural one. The .NET backend in this repo is the real thing — CQRS, EF Core, JWT auth, background jobs and all — and it runs locally in a couple of commands (see [Running it locally](#running-it-locally)). It simply isn't deployed anywhere, because a portfolio project didn't justify the monthly cloud bill.
 
 ---
 
@@ -77,17 +81,29 @@ On the frontend, server state is owned entirely by TanStack Query (no hand-rolle
 
 ## Deployment
 
-Runs on Azure:
+The public demo is a **static frontend build on Vercel** — no server, no database, no running costs.
 
-- **Frontend** — Azure Static Web Apps, deployed via its own GitHub Actions workflow (PR preview environments included)
-- **API** — Azure App Service, running a Docker image built in CI and pushed to Docker Hub
-- **Database** — Azure SQL Database
+`npm run build:demo` sets `VITE_DEMO_MODE=true`, which starts an MSW service worker that intercepts `/api/*` and serves seeded data from `localStorage`. The client code is untouched by this: `agent.ts`, the axios interceptors and every React Query hook run exactly as they do against the real API. The interception happens *below* them, at the network layer.
 
-`ci.yml` runs backend and frontend tests in parallel, then deploys the API on a pass to `main`.
+The MSW import is dynamic, so a normal `npm run build` tree-shakes it out completely — demo mode adds nothing to a real production bundle.
+
+`ci.yml` runs the .NET tests and the frontend build + tests on every push. Vercel handles deployment through its own GitHub integration.
+
+> Previously deployed on Azure (Static Web Apps + App Service + Azure SQL), and on AWS before that. Those resources were torn down in September 2026.
 
 ## Running it locally
 
-You'll need .NET 10 SDK, Node 20+, and Docker (for SQL Server).
+This runs the **real** stack — .NET API, SQL Server, and the frontend talking to it over HTTP.
+
+If you only want to poke at the UI, skip all of this and run the mocked frontend on its own:
+
+```bash
+cd client
+npm install
+npm run dev:demo
+```
+
+For the full stack, you'll need .NET 10 SDK, Node 20+, and Docker (for SQL Server).
 
 **1. Start the database**
 

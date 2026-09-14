@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router";
 import { Loader2 } from "lucide-react";
+import { isDemoMode } from "@/lib/demo";
 
 export default function Register() {
    const [submitted, setSubmitted] = useState(false);
@@ -37,9 +38,14 @@ export default function Register() {
                <div className="rounded-2xl border bg-card overflow-hidden w-full">
                   <div className="px-6 py-8 flex flex-col gap-3">
                      <p className="text-xs font-semibold tracking-widest uppercase text-muted-foreground">Next step</p>
-                     <h1 className="text-xl font-bold tracking-tight">Check your email</h1>
+                     {/* No mailbox in demo mode, so don't send people looking for an email. */}
+                     <h1 className="text-xl font-bold tracking-tight">
+                        {isDemoMode ? "Account created" : "Check your email"}
+                     </h1>
                      <p className="text-sm text-muted-foreground">
-                        We've sent a verification link to your email. Click it to activate your account.
+                        {isDemoMode
+                           ? "Email verification is skipped in the demo. You can sign in with the details you just entered."
+                           : "We've sent a verification link to your email. Click it to activate your account."}
                      </p>
                   </div>
                </div>

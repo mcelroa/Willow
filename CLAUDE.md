@@ -13,11 +13,13 @@ dotnet ef migrations remove -p Persistence -s API
 
 ### Frontend (React + Vite) — run from `client/`
 ```bash
-npm run dev       # https://localhost:3000
+npm run dev         # https://localhost:3000 (needs the API running)
+npm run dev:demo    # mocked backend — no API needed, see Demo mode below
 npm run build
+npm run build:demo  # what Vercel deploys
 npm run lint
-npm run test      # Vitest watch
-npm run test:run  # Vitest single run (CI)
+npm run test        # Vitest watch
+npm run test:run    # Vitest single run (CI)
 ```
 
 ### Backend tests
@@ -34,9 +36,9 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 
 ### Backend — 4 projects
 
-**`Domain`** — plain C# entities: `CheckIn`, `AppUser`, `ShareLink`, `Medication`, and `MedicationSchedule`. `AppUser` adds `ReminderEnabled` (bool) and `TouredPages` (string, comma-separated page names — exposed as `string[]` on `UserDto`). `Medication` has name, optional dosage, optional targetSymptom, isActive, and a collection of `MedicationSchedule` (dayOfWeek int + TimeOnly time).
+**`Domain`** — plain C# entities: `CheckIn`, `AppUser`, `ShareLink`, `Medication`, `MedicationSchedule`, and `MedicationAdherence`. `AppUser` adds `ReminderEnabled` (bool) and `TouredPages` (string, comma-separated page names — exposed as `string[]` on `UserDto`). `Medication` has name, optional dosage, optional targetSymptom, isActive, and a collection of `MedicationSchedule` (dayOfWeek int + TimeOnly time). `MedicationAdherence` records one taken-dose row per (UserId, MedicationId, Date).
 
-**`Persistence`** — EF Core + PostgreSQL. `AppDbContext` extends `IdentityDbContext<AppUser>`.
+**`Persistence`** — EF Core + SQL Server. `AppDbContext` extends `IdentityDbContext<AppUser>`.
 
 **`Application`** — all business logic. Key patterns:
 - **CQRS via MediatR** — `Query`/`Command` + `Handler` in a single file per operation
@@ -44,6 +46,7 @@ Cancer patient symptom tracker — daily check-ins (mood, pain, fatigue, nausea 
 - **AutoMapper** — `Core/MappingProfiles.cs`. Use `ProjectTo<T>` in queries
 - **FluentValidation** — `ValidationBehaviour<T>` runs validators automatically before every handler
 - **EF Core concurrency** — never run multiple `ToListAsync` calls on the same `DbContext` concurrently (e.g. via `Task.WhenAll`). EF Core throws `InvalidOperationException`. Always await queries sequentially.
+- **AI-suggested care team questions** — `Questions/Queries/GetQuestionSuggestions.Query` gathers the last 30 days of check-ins, active medications, and existing unasked questions, then calls `IAiService.GetQuestionSuggestionsAsync` (interface in `Application/Core/Interfaces`). `API/Services/ClaudeAiService.cs` implements it by calling the Anthropic Messages API directly over `HttpClient` (model `claude-haiku-4-5-20251001`), stripping markdown code fences before parsing the JSON array response. `GET /api/questions/suggestions` on `QuestionsController`.
 
 **`API`** — ASP.NET Core host. Key points:
 - `BaseApiController` provides `Mediator` and `HandleResult<T>()` — controllers are thin dispatchers
@@ -102,7 +105,9 @@ src/
     medications/    # Medications.tsx (CRUD + schedule builder)
     question/       # Questions.tsx
     sharing/        # Sharing.tsx (management, behind auth), SharedView.tsx (public /share/:token)
+  mocks/            # demo mode only — MSW handlers, localStorage store, seed data, PDF writer
   components/
+    DemoBanner.tsx    # floating "Demo mode" notice + reset button; renders null outside demo mode
     PageHeader.tsx    # shared page header: title (text-2xl font-bold tracking-tight), optional description, optional action slot
     LoadingSpinner.tsx # centered Loader2 spinner for loading states
     EmptyState.tsx    # icon + title + optional description + optional action; used for empty lists/no-data states
@@ -110,6 +115,7 @@ src/
     WillowMark.tsx    # brand SVG mark; variant="full" (7 fronds, 72px+) or variant="small" (3 fronds, nav-sized); uses currentColor so wrap in a colored element or pass className. Favicon (client/public/favicon.svg) mirrors the small variant with hardcoded #2e7d5c (hex approx of primary oklch).
   lib/
     api/agent.ts    # all API methods
+    demo.ts         # isDemoMode flag + demo credentials; deliberately imports nothing from mocks/
     hooks/          # one React Query hook file per feature
     schemas/        # Zod schemas
     types/index.d.ts
@@ -130,25 +136,49 @@ src/
   "ConnectionStrings": { "DefaultConnection": "Server=localhost,1433;Database=willow;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true" },
   "Jwt": { "Key": "<≥64 chars>" },
   "ClientUrl": "https://localhost:3000",
-  "Resend": { "ApiKey": "", "FromEmail": "noreply@willow-health.pro" }
+  "Resend": { "ApiKey": "", "FromEmail": "noreply@willow-health.pro" },
+  "Anthropic": { "ApiKey": "" }
 }
 ```
 Start local SQL Server: `docker compose up mssql -d`
 
-## Deployment (Azure)
+## Deployment — demo mode on Vercel
 
-Production: **frontend on Azure Static Web Apps** (`VITE_API_URL=https://willow-api.azurewebsites.net/api` — the `/api` suffix is required, it's the verbatim axios baseURL), **API on Azure App Service** (`willow-api`), **DB on Azure SQL Database**.
+The Azure infrastructure (App Service, Azure SQL, Static Web Apps) was **torn down in September 2026** to stop the hosting spend. There is no deployed backend. What's live is a **frontend-only demo** on Vercel that serves mocked data from the browser.
 
-### Two separate CI/CD workflows
-- `.github/workflows/ci.yml` — runs `.NET Tests` + `Frontend Build` in parallel, then `Deploy to Azure` job (main pushes only). Builds Docker image, pushes to Docker Hub (`gillarua/willow-api:latest`), deploys to App Service via `azure/webapps-deploy@v3`.
-- `.github/workflows/azure-static-web-apps-black-bush-0c60fd403.yml` — Azure-generated workflow; builds and deploys the React frontend to Azure Static Web Apps on every push to main and on PRs (preview environments on PRs, cleanup on PR close).
+The backend is fully intact in the repo and still runs locally (`dotnet run --project API` + `docker compose up mssql -d`). Don't delete it — demo mode is a build flag, not a replacement.
 
-### Key deployment details
-- **GitHub secrets needed**: `DOCKER_USERNAME`, `DOCKER_PASSWORD`, `AZURE_PUBLISH_PROFILE` (App Service publish profile), `AZURE_STATIC_WEB_APPS_API_TOKEN_BLACK_BUSH_0C60FD403`.
-- **SPA routing**: `client/public/staticwebapp.config.json` — `navigationFallback` rewrites all non-asset paths to `/index.html` (replaces nginx `try_files`).
-- **App Service env vars**: `ConnectionStrings__DefaultConnection` (SQL Server ADO.NET connection string), `Jwt__Key`, `Resend__ApiKey`, `ASPNETCORE_ENVIRONMENT=Production`, `ClientUrl`, `CORS_ORIGIN`, `Resend__FromEmail`. Alternatively set via the App Service "Connection strings" blade as `DefaultConnection` (type: SQLAzure).
-- `ReminderBackgroundService` runs in-process — keep App Service at 1 instance to avoid duplicate reminder emails.
-- `/health` endpoint is used for App Service health checks — don't remove or rename without updating the health-check config.
+### Demo mode
+
+Driven by `VITE_DEMO_MODE=true` (set in the committed `client/.env.demo`, applied via `--mode demo`):
+
+```bash
+npm run dev:demo     # dev server with mocks
+npm run build:demo   # production demo build — what Vercel runs
+```
+
+- **MSW** (`msw` v2) intercepts `/api/*` at the service worker layer, below axios. `agent.ts` and every React Query hook are **unchanged** — the real client code path still runs.
+- `main.tsx` **awaits** `worker.start()` before rendering. This matters: service worker activation is async, and rendering first lets the initial `GET /api/account` escape to the network, 401, and bounce the user to `/login`.
+- The MSW import is **dynamic**, so a normal `npm run build` tree-shakes MSW out entirely (verified: normal bundle contains no MSW; demo build splits it into a separate ~278 kB chunk).
+- `client/public/mockServiceWorker.js` is generated by `npx msw init public/ --save` and **must stay committed** — it's served as a static asset.
+
+### `client/src/mocks/`
+- `seed.ts` — deterministic seed (fixed-seed mulberry32 PRNG) so every visitor sees identical data. ~90 days of check-ins on a recovery arc, 5 medications, 5 questions, adherence history, 2 share links. Dates are generated relative to *today*, so the demo never looks stale.
+- `db.ts` — localStorage store under `willow:demo`, wrapped in a **versioned envelope**. Bump `SCHEMA_VERSION` whenever the seed shape changes, or stored blobs from older builds will be missing fields and crash the UI. Falls back to in-memory when storage is blocked (Safari private mode).
+- `handlers.ts` — one handler per `agent.ts` endpoint, reading/writing through `db.ts` so mutations genuinely persist. **Handler order matters** — MSW matches in registration order, so literal paths must precede parameterised ones (`DELETE /sharing/revoked` before `DELETE /sharing/:id`; `GET /questions/suggestions` before the `:id` routes). Paths are registered as `*/api/...` so they match regardless of how `VITE_API_URL` is configured.
+- `pdf.ts` — minimal hand-rolled PDF writer. The real export is server-side QuestPDF, which can't run in a static deploy; this builds a valid multi-page document from live store data so the download isn't stale. The xref table stores byte offsets, so **all output must stay ASCII** — `escapeText` strips non-ASCII to keep string length equal to byte length.
+- `browser.ts` — `setupWorker(...handlers)`.
+
+### Features that differ in demo mode
+- **AI question suggestions** — canned array (can't ship an Anthropic key to a browser), with a 900 ms delay so the loading state is visible.
+- **Emails** (verify, password reset, reminders) — no mailbox. Endpoints return success; `Register.tsx` shows "Account created" instead of "Check your email".
+- **Auth** — login validates against the seeded credentials properly, so the error path still works. `Login.tsx` prefills them in demo mode. Register rebinds the single demo account to the details entered.
+- **Share links** — work fully, but only within that browser's storage. `/share/demo` is seeded so a first-time visitor always has a working public link.
+
+### Vercel setup
+- `client/vercel.json` — `buildCommand: npm run build:demo`, SPA catch-all rewrite, and `no-store` cache headers on `mockServiceWorker.js` so a stale worker can't survive a deploy. Vercel checks the filesystem *before* applying rewrites, so the worker isn't swallowed by the SPA fallback.
+- **Vercel project root directory must be set to `client`.**
+- `.github/workflows/ci.yml` runs tests + build only. Vercel deploys via its own GitHub integration — no deploy job in CI.
 
 ## Testing
 
@@ -166,4 +196,5 @@ Production: **frontend on Azure Static Web Apps** (`VITE_API_URL=https://willow-
 - Tests in `__tests__/` subdirectories alongside the code
 - Forms must have `noValidate` — browser validation blocks RHF/Zod otherwise
 - Mock hooks with `vi.mock('@/lib/hooks/useX', ...)`, wrap routed components in `<MemoryRouter>`
+- **Mock/demo tests** — `src/mocks/__tests__/`. `handlers.test.ts` drives the MSW handlers through `setupServer` from `msw/node` with plain `fetch`, covering auth, CRUD round trips, cascade deletes, and the route-ordering traps. `pdf.test.ts` validates the generated PDF's xref byte offsets and stream lengths against the actual output. Call `localStorage.clear()` in `beforeEach` so each test starts from a fresh seed.
 - **Hook tests** — use `renderHook` + a `QueryClientProvider` wrapper (`retry: false` to avoid retries on errors); mock `agent` with `vi.mock('@/lib/api/agent', ...)`; use `waitFor` to await query/mutation state; use `vi.hoisted` to create spies that are safe to reference inside `vi.mock` factories (needed for `mockNavigate` in `useAccount` tests)
