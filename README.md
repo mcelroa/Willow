@@ -6,7 +6,7 @@ Treatment days blur together. By the time you're back in front of your care team
 
 It's a full-stack app: a .NET 10 API using EF Core and SQL Server, and a React 19 single-page frontend.
 
-🔗 **Live demo:** _(set this to your Vercel URL)_
+🔗 **Live demo:** [willow-health.pro](https://willow-health.pro)
 
 > **About the demo.** The live link runs the real frontend against a **mocked backend** — [MSW](https://mswjs.io) intercepts every API call in the browser and serves seeded data from `localStorage`. It's fully interactive: add a check-in, log a dose, generate a share link, export a PDF. Your changes persist in your browser and are visible only to you, and a **Reset demo data** button restores the original sample data.
 >
