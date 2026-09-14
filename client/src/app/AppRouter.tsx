@@ -20,35 +20,39 @@ import SharedView from "@/features/sharing/SharedView";
 import LandingPage from "@/features/landing/LandingPage";
 import PrivacyPolicy from "@/features/landing/PrivacyPolicy";
 import NotFound from "@/features/errors/NotFound";
+import DemoBanner from "@/components/DemoBanner";
 
 export default function AppRouter() {
    return (
-      <Routes>
-         <Route path="/" element={<LandingPage />} />
-         <Route path="/privacy" element={<PrivacyPolicy />} />
-         <Route path="/login" element={<Login />} />
-         <Route path="/register" element={<Register />} />
-         <Route path="/forgot-password" element={<ForgotPassword />} />
-         <Route path="/reset-password" element={<ResetPassword />} />
-         <Route path="/verify-email" element={<VerifyEmail />} />
-         <Route path="/share/:token" element={<SharedView />} />
+      <>
+         <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/share/:token" element={<SharedView />} />
 
-         <Route element={<RequireAuth />}>
-            <Route element={<Layout />}>
-               <Route path="/checkin" element={<CheckIn />} />
-               <Route path="/history" element={<History />} />
-               <Route path="/history/:id" element={<EditCheckIn />} />
-               <Route path="/trends" element={<Trends />} />
-               <Route path="/questions" element={<Questions />} />
-               <Route path="/summary" element={<Summary />} />
-               <Route path="/sharing" element={<Sharing />} />
-               <Route path="/medications" element={<Medications />} />
-               <Route path="/change-password" element={<ChangePassword />} />
-               <Route path="/account/settings" element={<AccountSettings />} />
+            <Route element={<RequireAuth />}>
+               <Route element={<Layout />}>
+                  <Route path="/checkin" element={<CheckIn />} />
+                  <Route path="/history" element={<History />} />
+                  <Route path="/history/:id" element={<EditCheckIn />} />
+                  <Route path="/trends" element={<Trends />} />
+                  <Route path="/questions" element={<Questions />} />
+                  <Route path="/summary" element={<Summary />} />
+                  <Route path="/sharing" element={<Sharing />} />
+                  <Route path="/medications" element={<Medications />} />
+                  <Route path="/change-password" element={<ChangePassword />} />
+                  <Route path="/account/settings" element={<AccountSettings />} />
+               </Route>
             </Route>
-         </Route>
 
-         <Route path="*" element={<NotFound />} />
-      </Routes>
+            <Route path="*" element={<NotFound />} />
+         </Routes>
+         <DemoBanner />
+      </>
    );
 }

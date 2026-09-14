@@ -1,6 +1,7 @@
 import { WillowMark } from "@/components/WillowMark";
 import { useAccount } from "@/lib/hooks/useAccount";
 import { Link } from "react-router";
+import { isDemoMode } from "@/lib/demo";
 import "./landing.css";
 
 // ─── colour tokens (landing-only, not in the design system) ─────────────────
@@ -98,7 +99,9 @@ export default function LandingPage() {
                   ) : (
                      <>
                         <Link to="/login" style={navBtnGhost}>Log in</Link>
-                        <Link to="/register" style={navBtnPrimary}>Get started →</Link>
+                        <Link to={isDemoMode ? "/login" : "/register"} style={navBtnPrimary}>
+                           {isDemoMode ? "Try the demo →" : "Get started →"}
+                        </Link>
                      </>
                   )}
                </div>
@@ -169,7 +172,9 @@ export default function LandingPage() {
                      <Link to="/checkin" style={heroBtnPrimary}>Open app →</Link>
                   ) : (
                      <>
-                        <Link to="/register" style={heroBtnPrimary}>Get started free</Link>
+                        <Link to={isDemoMode ? "/login" : "/register"} style={heroBtnPrimary}>
+                           {isDemoMode ? "Try the demo" : "Get started free"}
+                        </Link>
                         <Link to="/login" style={heroBtnGhost}>Log in</Link>
                      </>
                   )}
@@ -275,10 +280,12 @@ export default function LandingPage() {
                      fontSize: 15, color: C.creamSub,
                      marginBottom: 36, lineHeight: 1.6,
                   }}>
-                     Free. Takes less than a minute to set up.
+                     {isDemoMode
+                        ? "Sample data, no sign-up. Nothing leaves your browser."
+                        : "Free. Takes less than a minute to set up."}
                   </p>
-                  <Link to="/register" style={heroBtnPrimary}>
-                     Get started free
+                  <Link to={isDemoMode ? "/login" : "/register"} style={heroBtnPrimary}>
+                     {isDemoMode ? "Try the demo" : "Get started free"}
                   </Link>
                </div>
             </section>
