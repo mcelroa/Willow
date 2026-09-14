@@ -129,6 +129,7 @@ src/
 5. Controller in `API/Controllers/` extending `BaseApiController`
 6. Types in `src/lib/types/index.d.ts`, API methods in `agent.ts`, Zod schema, React Query hook
 7. Page component in `src/features/<feature>/`, route in `AppRouter.tsx`
+8. **Add a matching MSW handler in `src/mocks/handlers.ts`** (plus seed data in `seed.ts` if the feature needs any). Easy to forget, because everything still works locally against the real API — but the live demo is the only deployed build, so a missing handler means the new page hangs or errors in production while passing every test.
 
 ### Config (`appsettings.Development.json` — gitignored)
 ```json
